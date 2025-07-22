@@ -1,0 +1,11 @@
+{
+  "modelo_IA": "mistral-7b-instruct-v0.1.Q4_K_M.gguf",
+  "estructura_base": "~/DemianRoot/",
+  "modulos_activos": ["organizador", "asistente", "drive"],
+  "carpeta_para_eliminar": "~/DemianRoot/para_eliminar/",
+  "estado": "instalado",
+  "jarbys_fase": 1,
+  "estructura_confirmada": true,
+  "drive_activo": true,
+  "repositorio_oficial": "Rigohl/-J-Vairyx-q.0.ui"
+}
