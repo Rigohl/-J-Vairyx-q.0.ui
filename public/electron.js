@@ -50,6 +50,79 @@ function createWindow() {
     shell.openExternal(url);
     return { action: 'deny' };
   });
+
+  // Set up application menu
+  const template = [
+    {
+      label: 'J-Vairyx',
+      submenu: [
+        {
+          label: 'Acerca de J-Vairyx',
+          click: () => {
+            const { dialog } = require('electron');
+            dialog.showMessageBox(mainWindow, {
+              type: 'info',
+              title: 'Acerca de J-Vairyx',
+              message: 'J-Vairyx Personal Assistant',
+              detail: `Versión: ${app.getVersion()}\nAsistente Personal Inteligente\n\nDesarrollado por Rigoberto Huston Laredo\nLicencia MIT`
+            });
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Configuraciones',
+          accelerator: 'CmdOrCtrl+,',
+          click: () => {
+            // TODO: Open settings window
+          }
+        },
+        { type: 'separator' },
+        {
+          label: 'Salir',
+          accelerator: process.platform === 'darwin' ? 'Cmd+Q' : 'Ctrl+Q',
+          click: () => {
+            app.quit();
+          }
+        }
+      ]
+    },
+    {
+      label: 'Editar',
+      submenu: [
+        { role: 'undo', label: 'Deshacer' },
+        { role: 'redo', label: 'Rehacer' },
+        { type: 'separator' },
+        { role: 'cut', label: 'Cortar' },
+        { role: 'copy', label: 'Copiar' },
+        { role: 'paste', label: 'Pegar' },
+        { role: 'selectall', label: 'Seleccionar todo' }
+      ]
+    },
+    {
+      label: 'Ver',
+      submenu: [
+        { role: 'reload', label: 'Recargar' },
+        { role: 'forceReload', label: 'Forzar recarga' },
+        { role: 'toggleDevTools', label: 'Herramientas de desarrollador' },
+        { type: 'separator' },
+        { role: 'resetZoom', label: 'Zoom normal' },
+        { role: 'zoomIn', label: 'Acercar' },
+        { role: 'zoomOut', label: 'Alejar' },
+        { type: 'separator' },
+        { role: 'togglefullscreen', label: 'Pantalla completa' }
+      ]
+    },
+    {
+      label: 'Ventana',
+      submenu: [
+        { role: 'minimize', label: 'Minimizar' },
+        { role: 'close', label: 'Cerrar' }
+      ]
+    }
+  ];
+
+  const menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
 }
 
 // App event listeners
@@ -84,4 +157,105 @@ ipcMain.handle('show-message-box', async (event, options) => {
   const { dialog } = require('electron');
   const result = await dialog.showMessageBox(mainWindow, options);
   return result;
+});
+
+// Data storage using Electron's userData
+const fs = require('fs');
+const dataPath = path.join(app.getPath('userData'), 'j-vairyx-data.json');
+
+const loadData = () => {
+  try {
+    if (fs.existsSync(dataPath)) {
+      return JSON.parse(fs.readFileSync(dataPath, 'utf8'));
+    }
+  } catch (error) {
+    console.error('Error loading data:', error);
+  }
+  return {
+    tasks: [],
+    files: [],
+    chatHistory: [],
+    settings: {}
+  };
+};
+
+const saveData = (data) => {
+  try {
+    fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
+  } catch (error) {
+    console.error('Error saving data:', error);
+  }
+};
+
+let appData = loadData();
+
+// Organizer IPC handlers
+ipcMain.handle('organizer-get-tasks', () => {
+  return appData.tasks;
+});
+
+ipcMain.handle('organizer-add-task', (event, task) => {
+  appData.tasks.push({ ...task, id: Date.now() });
+  saveData(appData);
+  return appData.tasks;
+});
+
+ipcMain.handle('organizer-update-task', (event, id, updates) => {
+  const index = appData.tasks.findIndex(task => task.id === id);
+  if (index !== -1) {
+    appData.tasks[index] = { ...appData.tasks[index], ...updates };
+    saveData(appData);
+  }
+  return appData.tasks;
+});
+
+ipcMain.handle('organizer-delete-task', (event, id) => {
+  appData.tasks = appData.tasks.filter(task => task.id !== id);
+  saveData(appData);
+  return appData.tasks;
+});
+
+// Assistant IPC handlers
+ipcMain.handle('assistant-get-history', () => {
+  return appData.chatHistory;
+});
+
+ipcMain.handle('assistant-send-message', (event, message) => {
+  // In a real implementation, this would call an AI model
+  const responses = [
+    'Entiendo tu consulta. Estoy procesando la información...',
+    'Basándome en los datos disponibles, puedo sugerirte las siguientes opciones...',
+    'He analizado tu solicitud y aquí tienes algunas recomendaciones...',
+    'Perfecto, he completado el análisis. Aquí está la respuesta que buscas...',
+    'Excelente pregunta. Déjame ayudarte con eso...'
+  ];
+  
+  const response = responses[Math.floor(Math.random() * responses.length)];
+  return response;
+});
+
+// Drive IPC handlers
+ipcMain.handle('drive-get-files', () => {
+  return appData.files;
+});
+
+ipcMain.handle('drive-upload-file', async (event, filePath) => {
+  // In a real implementation, this would handle actual file uploads
+  const newFile = {
+    id: Date.now(),
+    name: `uploaded_${Date.now()}.txt`,
+    size: `${Math.floor(Math.random() * 1000) + 100} KB`,
+    type: 'txt',
+    uploadDate: new Date()
+  };
+  
+  appData.files.push(newFile);
+  saveData(appData);
+  return appData.files;
+});
+
+ipcMain.handle('drive-download-file', (event, fileId) => {
+  // In a real implementation, this would handle actual file downloads
+  const file = appData.files.find(f => f.id === fileId);
+  return file ? `Descargando: ${file.name}` : 'Archivo no encontrado';
 });
