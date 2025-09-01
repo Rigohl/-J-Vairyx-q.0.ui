@@ -641,3 +641,216 @@
     height: 50px;
   }
 }
+
+/* Enhanced Attention Status Panel */
+.attention-status-panel {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: rgba(0, 30, 60, 0.8);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  margin: 1rem 0;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 20px rgba(0, 255, 255, 0.2);
+}
+
+.status-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.status-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.status-value {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(0, 255, 255, 0.9);
+  text-shadow: 0 0 8px rgba(0, 255, 255, 0.5);
+}
+
+.status-value.active {
+  color: rgba(0, 255, 100, 0.9);
+  text-shadow: 0 0 8px rgba(0, 255, 100, 0.5);
+  animation: activeGlow 2s ease-in-out infinite;
+}
+
+.status-value.idle {
+  color: rgba(255, 200, 0, 0.9);
+  text-shadow: 0 0 8px rgba(255, 200, 0, 0.5);
+  animation: idleGlow 1.5s ease-in-out infinite;
+}
+
+/* Proactive Suggestions Panel */
+.proactive-suggestions-panel {
+  margin: 1rem 0;
+  border: 2px solid rgba(255, 100, 255, 0.4);
+  background: linear-gradient(145deg, 
+    rgba(40, 0, 60, 0.9) 0%,
+    rgba(20, 0, 40, 0.95) 50%,
+    rgba(40, 0, 60, 0.9) 100%);
+  animation: suggestionPanelGlow 3s ease-in-out infinite alternate;
+}
+
+.suggestions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(255, 100, 255, 0.3);
+}
+
+.suggestions-header h4 {
+  margin: 0;
+  color: rgba(255, 100, 255, 0.9);
+  font-size: 1rem;
+  text-shadow: 0 0 10px rgba(255, 100, 255, 0.5);
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem;
+  border-bottom: 1px solid rgba(255, 100, 255, 0.1);
+}
+
+.suggestion-item:last-child {
+  border-bottom: none;
+}
+
+.suggestion-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex: 1;
+}
+
+.suggestion-type {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.suggestion-content p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.4;
+  font-size: 0.9rem;
+}
+
+.suggestion-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+/* Command Examples Styling */
+.command-examples {
+  background: rgba(0, 50, 100, 0.3);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem;
+}
+
+.command-examples h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+}
+
+.command-examples div {
+  margin: 0.25rem 0;
+  padding-left: 1rem;
+  position: relative;
+}
+
+.command-examples div:before {
+  content: "▶";
+  position: absolute;
+  left: 0;
+  color: rgba(0, 255, 255, 0.6);
+}
+
+/* Enhanced holographic effects */
+@keyframes activeGlow {
+  0%, 100% { text-shadow: 0 0 8px rgba(0, 255, 100, 0.5); }
+  50% { text-shadow: 0 0 15px rgba(0, 255, 100, 0.8); }
+}
+
+@keyframes idleGlow {
+  0%, 100% { text-shadow: 0 0 8px rgba(255, 200, 0, 0.5); }
+  50% { text-shadow: 0 0 12px rgba(255, 200, 0, 0.7); }
+}
+
+@keyframes suggestionPanelGlow {
+  0% { 
+    border-color: rgba(255, 100, 255, 0.4);
+    box-shadow: 0 0 20px rgba(255, 100, 255, 0.2);
+  }
+  100% { 
+    border-color: rgba(255, 100, 255, 0.6);
+    box-shadow: 0 0 30px rgba(255, 100, 255, 0.4);
+  }
+}
+
+/* Responsive design for new elements */
+@media (max-width: 768px) {
+  .attention-status-panel {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+  
+  .status-item {
+    flex-direction: row;
+    gap: 0.5rem;
+  }
+  
+  .suggestion-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+  
+  .suggestion-actions {
+    justify-content: center;
+  }
+}
+
+/* Enhanced Drive Module Styles */
+.advanced-create-panel {
+  background: rgba(0, 40, 80, 0.3);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.create-section {
+  margin-bottom: 1.5rem;
+}
+
+.create-section:last-child {
+  margin-bottom: 0;
+}
+
+.create-section h4 {
+  margin: 0 0 0.75rem 0;
+  color: rgba(0, 255, 255, 0.8);
+  font-size: 1rem;
+}
+
+.simple-create-panel {
+  background: rgba(0, 60, 120, 0.2);
+  border: 1px solid rgba(0, 255, 255, 0.1);
+  border-radius: 6px;
+  padding: 0.75rem;
+  margin-top: 1rem;
+}
