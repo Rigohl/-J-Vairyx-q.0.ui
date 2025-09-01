@@ -309,3 +309,243 @@ body {
   color: white;
   font-size: 0.7rem;
 }
+
+/* Holographic Assistant Styles */
+.holographic-assistant {
+  background: linear-gradient(145deg, 
+    rgba(0, 20, 40, 0.95) 0%,
+    rgba(0, 40, 80, 0.9) 50%,
+    rgba(0, 20, 40, 0.95) 100%);
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 
+    0 0 30px rgba(0, 255, 255, 0.2),
+    inset 0 0 30px rgba(0, 255, 255, 0.1);
+}
+
+.assistant-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.holographic-title {
+  color: rgba(0, 255, 255, 0.9);
+  text-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+  font-weight: 300;
+  letter-spacing: 2px;
+  margin-bottom: 1.5rem;
+}
+
+.holographic-card {
+  background: linear-gradient(145deg, 
+    rgba(0, 255, 255, 0.05) 0%,
+    rgba(0, 150, 255, 0.03) 50%,
+    rgba(0, 255, 255, 0.05) 100%);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 12px;
+  backdrop-filter: blur(15px);
+  box-shadow: 
+    0 8px 25px rgba(0, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.chat-card {
+  margin-bottom: 1.5rem;
+}
+
+.holographic-chat {
+  background: transparent;
+  border: none;
+}
+
+.holographic-chat .chat-messages {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 10px;
+  height: 350px;
+}
+
+.holographic-message {
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  position: relative;
+  overflow: hidden;
+}
+
+.holographic-message::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%,
+    rgba(0, 255, 255, 0.1) 50%,
+    transparent 100%);
+  animation: messageShimmer 3s ease-in-out infinite;
+}
+
+.holographic-message.user {
+  background: linear-gradient(145deg, 
+    rgba(0, 255, 255, 0.2) 0%,
+    rgba(0, 150, 255, 0.15) 100%);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.holographic-message.assistant {
+  background: linear-gradient(145deg, 
+    rgba(100, 0, 255, 0.1) 0%,
+    rgba(0, 255, 100, 0.08) 100%);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.holographic-message.thinking {
+  animation: thinkingPulse 1.5s ease-in-out infinite alternate;
+}
+
+.message-content {
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.message-timestamp {
+  font-size: 0.7rem;
+  opacity: 0.6;
+  text-shadow: 0 0 5px rgba(0, 255, 255, 0.3);
+}
+
+.holographic-input-area {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.holographic-input {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.holographic-input::placeholder {
+  color: rgba(0, 255, 255, 0.5);
+}
+
+.holographic-input:focus {
+  outline: none;
+  border-color: rgba(0, 255, 255, 0.6);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.2);
+  background: rgba(0, 0, 0, 0.6);
+}
+
+.btn-holographic {
+  background: linear-gradient(145deg, 
+    rgba(0, 255, 255, 0.2) 0%,
+    rgba(0, 150, 255, 0.3) 100%);
+  border: 1px solid rgba(0, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 500;
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.btn-holographic:hover {
+  background: linear-gradient(145deg, 
+    rgba(0, 255, 255, 0.3) 0%,
+    rgba(0, 150, 255, 0.4) 100%);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.btn-holographic:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.capabilities-card {
+  margin-top: 1.5rem;
+}
+
+.holographic-subtitle {
+  color: rgba(0, 255, 255, 0.8);
+  text-shadow: 0 0 10px rgba(0, 255, 255, 0.4);
+  font-weight: 300;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+}
+
+.capabilities-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.capability-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(0, 255, 255, 0.05);
+  border: 1px solid rgba(0, 255, 255, 0.2);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.capability-item:hover {
+  background: rgba(0, 255, 255, 0.1);
+  border-color: rgba(0, 255, 255, 0.4);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 255, 255, 0.1);
+}
+
+.capability-icon {
+  font-size: 1.2rem;
+  filter: drop-shadow(0 0 8px rgba(0, 255, 255, 0.6));
+}
+
+.capability-text {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.9rem;
+  font-weight: 300;
+}
+
+.holographic-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 255, 255, 0.3);
+  border-top: 2px solid rgba(0, 255, 255, 0.8);
+  border-radius: 50%;
+  animation: holographicSpin 1s linear infinite;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.5);
+}
+
+/* Additional Animations */
+@keyframes messageShimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes holographicSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes thinkingPulse {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.02); }
+}
