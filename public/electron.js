@@ -254,11 +254,317 @@ ipcMain.handle('drive-upload-file', async (event, filePath) => {
   return appData.files;
 });
 
-ipcMain.handle('drive-download-file', (event, fileId) => {
-  // In a real implementation, this would handle actual file downloads
-  const file = appData.files.find(f => f.id === fileId);
-  return file ? `Descargando: ${file.name}` : 'Archivo no encontrado';
+ipcMain.handle('drive-download-file', async (event, file) => {
+  try {
+    const { dialog } = require('electron');
+    const fs = require('fs').promises;
+    const path = require('path');
+    
+    // Show save dialog
+    const { filePath, canceled } = await dialog.showSaveDialog(mainWindow, {
+      title: 'Guardar archivo',
+      defaultPath: file.name,
+      filters: [
+        { name: 'Todos los archivos', extensions: ['*'] }
+      ]
+    });
+    
+    if (canceled || !filePath) {
+      return { success: false, message: 'Descarga cancelada' };
+    }
+    
+    // Create sample content based on file type
+    let content = generateFileContent(file);
+    
+    // Write file
+    await fs.writeFile(filePath, content, 'utf8');
+    
+    return {
+      success: true,
+      message: `Archivo '${file.name}' descargado exitosamente en ${filePath}`,
+      path: filePath
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 });
+
+// Add file execution handler
+ipcMain.handle('execute-file', async (event, file) => {
+  try {
+    const { shell } = require('electron');
+    const fs = require('fs').promises;
+    const path = require('path');
+    const os = require('os');
+    
+    // Create temporary file with appropriate content
+    const tempDir = os.tmpdir();
+    const tempFilePath = path.join(tempDir, file.name);
+    const content = generateFileContent(file);
+    
+    await fs.writeFile(tempFilePath, content, 'utf8');
+    
+    // Execute based on file type
+    let result;
+    const extension = path.extname(file.name).toLowerCase();
+    
+    if (['.exe', '.msi', '.bat', '.cmd'].includes(extension)) {
+      // For executable files, ask for confirmation first
+      const { dialog } = require('electron');
+      const response = await dialog.showMessageBox(mainWindow, {
+        type: 'question',
+        buttons: ['Ejecutar', 'Cancelar'],
+        defaultId: 0,
+        title: 'Confirmar ejecución',
+        message: `¿Deseas ejecutar el archivo ${file.name}?`,
+        detail: 'Solo ejecuta archivos de fuentes confiables.'
+      });
+      
+      if (response.response === 0) {
+        await shell.openPath(tempFilePath);
+        result = { success: true, message: `Ejecutando ${file.name}...` };
+      } else {
+        result = { success: false, message: 'Ejecución cancelada por el usuario' };
+      }
+    } else if (['.js', '.py', '.html', '.txt', '.md', '.json', '.css'].includes(extension)) {
+      // For text/code files, open with default application
+      await shell.openPath(tempFilePath);
+      result = { success: true, message: `Abriendo ${file.name} con la aplicación predeterminada` };
+    } else {
+      // For other files, just open them
+      await shell.openPath(tempFilePath);
+      result = { success: true, message: `Abriendo ${file.name}` };
+    }
+    
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// Helper function to generate file content
+function generateFileContent(file) {
+  const extension = require('path').extname(file.name).toLowerCase();
+  const baseName = require('path').basename(file.name, extension);
+  
+  switch (extension) {
+    case '.html':
+      return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${baseName}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Archivo generado por J-Vairyx</h1>
+        <h2>Archivo: ${file.name}</h2>
+        <p>Este archivo fue creado automáticamente por tu asistente personal J-Vairyx.</p>
+        <p>Fecha de creación: ${new Date().toLocaleDateString('es-ES')}</p>
+        <p>¡Tu asistente inteligente está funcionando perfectamente! 🤖</p>
+    </div>
+</body>
+</html>`;
+
+    case '.js':
+      return `// Archivo generado por J-Vairyx Personal Assistant
+// Creado: ${new Date().toLocaleString('es-ES')}
+
+console.log('🚀 ¡Hola desde J-Vairyx!');
+console.log('Este archivo fue generado automáticamente por tu asistente personal');
+console.log('Archivo: ${file.name}');
+console.log('Fecha: ${new Date().toLocaleString('es-ES')}');
+
+// Función de ejemplo
+function saludarDesdeVairyx() {
+    return '¡Hola! Soy J-Vairyx, tu asistente personal inteligente 🤖';
+}
+
+// Auto-ejecución
+(() => {
+    console.log(saludarDesdeVairyx());
+    console.log('✅ Archivo ejecutado exitosamente');
+})();`;
+
+    case '.py':
+      return `#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Archivo generado por J-Vairyx Personal Assistant
+Creado: ${new Date().toLocaleString('es-ES')}
+"""
+
+import datetime
+import sys
+
+def main():
+    print("🚀 ¡Hola desde J-Vairyx!")
+    print("Este archivo fue generado automáticamente por tu asistente personal")
+    print(f"Archivo: ${file.name}")
+    print(f"Fecha: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("¡Tu asistente inteligente está funcionando perfectamente! 🤖")
+    
+    # Información del sistema
+    print(f"Python version: {sys.version}")
+    print("✅ Archivo ejecutado exitosamente")
+
+if __name__ == "__main__":
+    main()`;
+
+    case '.bat':
+      return `@echo off
+echo 🚀 Hola desde J-Vairyx Personal Assistant!
+echo Este archivo fue generado automaticamente por tu asistente personal
+echo Archivo: ${file.name}
+echo Fecha: %date% %time%
+echo.
+echo ¡Tu asistente inteligente esta funcionando perfectamente! 🤖
+echo.
+echo Presiona cualquier tecla para continuar...
+pause > nul`;
+
+    case '.json':
+      return JSON.stringify({
+        generatedBy: "J-Vairyx Personal Assistant",
+        fileName: file.name,
+        createdAt: new Date().toISOString(),
+        message: "¡Hola! Este archivo fue generado automáticamente por tu asistente personal inteligente",
+        status: "success",
+        features: [
+          "Generación automática de archivos",
+          "Ejecución inteligente",
+          "Asistente proactivo",
+          "Integración del sistema"
+        ]
+      }, null, 2);
+
+    case '.md':
+      return `# 🚀 Archivo generado por J-Vairyx
+
+## Información del archivo
+- **Nombre:** ${file.name}
+- **Generado por:** J-Vairyx Personal Assistant
+- **Fecha:** ${new Date().toLocaleString('es-ES')}
+
+## ¿Qué es J-Vairyx?
+
+J-Vairyx es tu asistente personal inteligente que puede:
+
+- ✨ Crear archivos automáticamente
+- 🚀 Ejecutar y abrir archivos con un clic
+- 🧠 Aprender de tus patrones de uso
+- 🤖 Proporcionarte sugerencias proactivas
+- 📁 Organizar tus archivos inteligentemente
+
+## ¡Funcionando perfectamente!
+
+Este archivo es una prueba de que tu asistente está funcionando correctamente.
+
+---
+*Generado automáticamente por J-Vairyx Personal Assistant 🤖*`;
+
+    case '.css':
+      return `/* Estilos generados por J-Vairyx Personal Assistant */
+/* Creado: ${new Date().toLocaleString('es-ES')} */
+
+/* Tema J-Vairyx - Futurista y elegante */
+:root {
+    --vairyx-primary: #667eea;
+    --vairyx-secondary: #764ba2;
+    --vairyx-accent: #f093fb;
+    --vairyx-glass: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--vairyx-primary) 0%, var(--vairyx-secondary) 100%);
+    min-height: 100vh;
+    color: white;
+}
+
+.vairyx-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.vairyx-card {
+    background: var(--vairyx-glass);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 30px;
+    margin: 20px 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+.vairyx-button {
+    background: linear-gradient(45deg, var(--vairyx-primary), var(--vairyx-accent));
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.vairyx-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Generado automáticamente por J-Vairyx 🤖 */`;
+
+    default:
+      return `Archivo generado por J-Vairyx Personal Assistant
+==============================================
+
+Información del archivo:
+- Nombre: ${file.name}
+- Tipo: ${file.type || 'desconocido'}
+- Generado: ${new Date().toLocaleString('es-ES')}
+
+¡Hola! Este archivo fue creado automáticamente por tu asistente personal J-Vairyx.
+
+J-Vairyx es un asistente inteligente que puede:
+✨ Crear y gestionar archivos
+🚀 Ejecutar programas automáticamente  
+🧠 Aprender de tus patrones de uso
+🤖 Proporcionarte ayuda proactiva
+📁 Organizar tu trabajo eficientemente
+
+¡Tu asistente está funcionando perfectamente!
+
+---
+Generado por J-Vairyx Personal Assistant 🤖`;
+  }
+}
 
 // Enhanced file system IPC handlers
 ipcMain.handle('create-file', async (event, filePath, content = '', options = {}) => {

@@ -3,6 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld('electronAPI', {
+  invoke: (channel, data) => ipcRenderer.invoke(channel, data),
   getVersion: () => ipcRenderer.invoke('app-version'),
   showMessageBox: (options) => ipcRenderer.invoke('show-message-box', options),
   
@@ -32,7 +33,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   drive: {
     getFiles: () => ipcRenderer.invoke('drive-get-files'),
     uploadFile: (filePath) => ipcRenderer.invoke('drive-upload-file', filePath),
-    downloadFile: (fileId) => ipcRenderer.invoke('drive-download-file', fileId),
+    downloadFile: (file) => ipcRenderer.invoke('drive-download-file', file),
+    executeFile: (file) => ipcRenderer.invoke('execute-file', file),
     createFile: (name, content, type) => ipcRenderer.invoke('drive-create-file', name, content, type),
     createFolder: (name) => ipcRenderer.invoke('drive-create-folder', name),
     deleteFile: (fileId) => ipcRenderer.invoke('drive-delete-file', fileId)
