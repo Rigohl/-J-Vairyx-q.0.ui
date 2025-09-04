@@ -125,9 +125,30 @@ const DriveModule = () => {
     setFiles(prev => prev.filter(file => file.id !== id));
   };
 
-  const downloadFile = (file) => {
-    // Simulate file download
-    alert(`Descargando: ${file.name}`);
+  const downloadFile = async (file) => {
+    try {
+      const result = await window.electronAPI.invoke('drive-download-file', file);
+      if (result.success) {
+        alert(`✅ ${result.message}`);
+      } else {
+        alert(`❌ ${result.error || result.message}`);
+      }
+    } catch (error) {
+      alert(`❌ Error descargando archivo: ${error.message}`);
+    }
+  };
+
+  const executeFile = async (file) => {
+    try {
+      const result = await window.electronAPI.invoke('execute-file', file);
+      if (result.success) {
+        alert(`🚀 ${result.message}`);
+      } else {
+        alert(`❌ ${result.error || result.message}`);
+      }
+    } catch (error) {
+      alert(`❌ Error ejecutando archivo: ${error.message}`);
+    }
   };
 
   const getFileIcon = (type, isFolder = false) => {
@@ -398,17 +419,25 @@ const DriveModule = () => {
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <button
+                    className="btn btn-small"
+                    style={{ background: '#28a745', color: 'white' }}
+                    onClick={() => executeFile(file)}
+                    title="Ejecutar/Abrir archivo"
+                  >
+                    🚀 Ejecutar
+                  </button>
+                  <button
                     className="btn btn-small btn-secondary"
                     onClick={() => downloadFile(file)}
                   >
-                    Descargar
+                    💾 Descargar
                   </button>
                   <button
                     className="btn btn-small"
                     style={{ background: '#dc3545', color: 'white' }}
                     onClick={() => deleteFile(file.id)}
                   >
-                    Eliminar
+                    🗑️ Eliminar
                   </button>
                 </div>
               </li>

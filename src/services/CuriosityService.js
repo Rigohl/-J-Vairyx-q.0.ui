@@ -157,7 +157,7 @@ class CuriosityService {
       if (this.shouldGenerateProactiveSuggestion()) {
         this.generateProactiveSuggestion();
       }
-    }, 300000); // Every 5 minutes
+    }, 120000); // Every 2 minutes for more responsiveness
   }
 
   shouldGenerateProactiveSuggestion() {
@@ -165,72 +165,164 @@ class CuriosityService {
     if (!this.attentionState.isActive) return false;
     
     const lastSuggestion = this.suggestions[this.suggestions.length - 1];
-    if (lastSuggestion && Date.now() - lastSuggestion.timestamp < 600000) { // 10 minutes
+    if (lastSuggestion && Date.now() - lastSuggestion.timestamp < 300000) { // 5 minutes
       return false;
     }
 
-    // Generate suggestions based on curiosity level
-    const chance = this.curiosityLevel === 'high' ? 0.7 : 
-                   this.curiosityLevel === 'medium' ? 0.4 : 0.2;
+    // Generate suggestions based on curiosity level - increased frequency
+    const chance = this.curiosityLevel === 'high' ? 0.8 : 
+                   this.curiosityLevel === 'medium' ? 0.6 : 0.3;
     
     return Math.random() < chance;
   }
 
   generateProactiveSuggestion() {
     const currentHour = new Date().getHours();
+    const currentDay = new Date().getDay();
     const suggestions = [];
 
-    // Time-based suggestions
-    if (currentHour >= 9 && currentHour <= 11) {
-      suggestions.push({
-        type: 'morning_productivity',
-        message: '¡Buenos días! Las mañanas son ideales para tareas que requieren más concentración. ¿Te ayudo a planificar tu día?'
-      });
+    // Enhanced time-based suggestions
+    if (currentHour >= 6 && currentHour <= 8) {
+      suggestions.push(
+        {
+          type: 'morning_start',
+          message: '¡Buenos días! 🌅 Soy J-Vairyx y estoy aquí para hacer tu día más productivo. ¿Quieres que revise tu agenda o cree algunos archivos para empezar?',
+          actions: ['revisar tareas', 'crear archivo', 'organizar día']
+        },
+        {
+          type: 'morning_motivation',
+          message: '☕ Un nuevo día lleno de posibilidades! ¿Te ayudo a crear un plan de trabajo o quieres explorar algún tema en particular?',
+          actions: ['planificar día', 'investigar tema', 'crear documento']
+        }
+      );
+    } else if (currentHour >= 9 && currentHour <= 11) {
+      suggestions.push(
+        {
+          type: 'morning_productivity',
+          message: '🚀 Perfecto momento para la máxima productividad! ¿Qué tal si creamos algunos archivos útiles o organizamos tu espacio de trabajo?',
+          actions: ['crear proyecto', 'organizar archivos', 'buscar información']
+        },
+        {
+          type: 'focus_time',
+          message: '🎯 Hora de enfocarse! Puedo ayudarte creando plantillas, organizando información o investigando temas complejos.',
+          actions: ['crear plantilla', 'investigar', 'organizar datos']
+        }
+      );
+    } else if (currentHour >= 12 && currentHour <= 14) {
+      suggestions.push(
+        {
+          type: 'midday_break',
+          message: '🍽️ Hora del almuerzo! Mientras descansas, puedo organizar tus archivos o preparar documentos para la tarde.',
+          actions: ['organizar todo', 'preparar documentos', 'revisar progreso']
+        }
+      );
     } else if (currentHour >= 14 && currentHour <= 16) {
+      suggestions.push(
+        {
+          type: 'afternoon_energy',
+          message: '⚡ Energía de tarde! Perfecto para tareas creativas. ¿Creamos algo nuevo o investigamos proyectos interesantes?',
+          actions: ['crear archivo creativo', 'investigar proyectos', 'desarrollar ideas']
+        },
+        {
+          type: 'collaboration_time',
+          message: '🤝 Momento ideal para colaboración! ¿Te ayudo a crear documentos compartidos o preparar presentaciones?',
+          actions: ['crear presentación', 'documento colaborativo', 'organizar ideas']
+        }
+      );
+    } else if (currentHour >= 17 && currentHour <= 19) {
+      suggestions.push(
+        {
+          type: 'evening_wrap',
+          message: '📋 Casi terminamos el día! ¿Organizamos lo logrado y preparamos todo para mañana?',
+          actions: ['resumen del día', 'planificar mañana', 'organizar archivos']
+        },
+        {
+          type: 'backup_time',
+          message: '💾 Hora de respaldo! Te ayudo a organizar y asegurar todos tus archivos importantes.',
+          actions: ['organizar archivos', 'crear respaldo', 'revisar documentos']
+        }
+      );
+    } else if (currentHour >= 20 && currentHour <= 22) {
+      suggestions.push(
+        {
+          type: 'evening_learning',
+          message: '📚 Perfecto para aprender algo nuevo! ¿Investigamos un tema interesante o creamos recursos de estudio?',
+          actions: ['investigar tema', 'crear notas', 'organizar aprendizaje']
+        }
+      );
+    }
+
+    // Day-specific suggestions
+    if (currentDay === 1) { // Monday
       suggestions.push({
-        type: 'afternoon_energy',
-        message: 'Es media tarde, un buen momento para revisar el progreso del día. ¿Quieres que revisemos tus tareas pendientes?'
+        type: 'monday_motivation',
+        message: '🎯 ¡Lunes de nuevos comienzos! Te ayudo a planificar la semana y crear la estructura que necesitas.',
+        actions: ['planificar semana', 'crear estructura', 'organizar objetivos']
       });
-    } else if (currentHour >= 18 && currentHour <= 20) {
+    } else if (currentDay === 5) { // Friday
       suggestions.push({
-        type: 'evening_wrap',
-        message: 'Se acerca el final del día. ¿Te ayudo a organizar lo que lograste hoy y planificar para mañana?'
+        type: 'friday_wrap',
+        message: '🎉 ¡Viernes! Cerremos la semana organizando todo y preparando un excelente fin de semana.',
+        actions: ['organizar semana', 'crear resumen', 'planificar descanso']
       });
     }
 
-    // Learning-based suggestions
-    suggestions.push({
-      type: 'skill_development',
-      message: '¿Sabías que puedo ayudarte a aprender nuevas habilidades? ¿Hay algo específico que te gustaría dominar?'
-    });
+    // Smart contextual suggestions
+    suggestions.push(
+      {
+        type: 'file_intelligence',
+        message: '🧠 Puedo crear archivos inteligentes que se ejecuten solos! ¿Qué tipo de automatización necesitas?',
+        actions: ['crear script', 'archivo ejecutable', 'automatización']
+      },
+      {
+        type: 'smart_organization',
+        message: '🗂️ Mi sistema de organización inteligente puede transformar tu flujo de trabajo. ¿Empezamos?',
+        actions: ['organizar inteligente', 'crear sistema', 'optimizar flujo']
+      },
+      {
+        type: 'learning_companion',
+        message: '🎓 Soy tu compañero de aprendizaje! Puedo investigar cualquier tema y crear recursos personalizados.',
+        actions: ['investigar profundo', 'crear recursos', 'explicar conceptos']
+      },
+      {
+        type: 'creative_assistant',
+        message: '🎨 Mi creatividad no tiene límites! Puedo generar contenido, ideas y soluciones únicas para ti.',
+        actions: ['generar ideas', 'crear contenido', 'soluciones creativas']
+      }
+    );
 
-    suggestions.push({
-      type: 'efficiency_tip',
-      message: 'He aprendido algunas formas de mejorar tu productividad. ¿Te interesa conocer algunos consejos personalizados?'
-    });
-
-    suggestions.push({
-      type: 'exploration',
-      message: '¿Te gusta explorar temas nuevos? Puedo sugerirte contenido interesante basado en tus intereses.'
-    });
-
-    // Random curiosity
-    suggestions.push({
-      type: 'random_fact',
-      message: '¿Sabías que...? ¡Tengo datos curiosos que podrían interesarte! ¿Quieres escuchar uno?'
-    });
-
-    const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
-    this.addSuggestion({
-      ...suggestion,
-      urgency: 'low',
-      category: 'proactive'
-    });
-
-    return suggestion;
+    if (suggestions.length > 0) {
+      const suggestion = suggestions[Math.floor(Math.random() * suggestions.length)];
+      suggestion.timestamp = Date.now();
+      this.suggestions.push(suggestion);
+      
+      // Emit suggestion to UI
+      this.emitSuggestion(suggestion);
+    }
   }
 
-  // Contextual Intelligence
+  // Enhanced suggestion broadcasting
+  emitSuggestion(suggestion) {
+    // Log the suggestion
+    console.log('🤖 J-Vairyx Suggestion:', suggestion);
+    
+    // Create a custom event for the suggestion
+    const event = new CustomEvent('vairyx-suggestion', {
+      detail: suggestion
+    });
+    
+    // Dispatch to the window
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(event);
+    }
+    
+    // Also try to notify the assistant if available
+    if (typeof window !== 'undefined' && window.vairyxNotificationSystem) {
+      window.vairyxNotificationSystem.showSuggestion(suggestion);
+    }
+  }
+
+  // Enhanced contextual intelligence
   analyzeContext(userMessage, currentModule) {
     const context = {
       message: userMessage.toLowerCase(),
@@ -239,49 +331,184 @@ class CuriosityService {
       suggestions: []
     };
 
-    // Analyze message for context clues
-    if (context.message.includes('ayuda') || context.message.includes('help')) {
+    // Enhanced message analysis with more intelligence
+    const messageWords = context.message.split(' ');
+    
+    // Help and guidance detection
+    if (context.message.includes('ayuda') || context.message.includes('help') || 
+        context.message.includes('cómo') || context.message.includes('how')) {
       context.suggestions.push({
         type: 'help_context',
-        message: 'Veo que necesitas ayuda. ¿Quieres que te explique todas mis capacidades o hay algo específico?'
+        message: '🤝 Veo que necesitas orientación. Soy muy inteligente y puedo ayudarte con archivos, investigación, organización y mucho más. ¿Por dónde empezamos?',
+        actions: ['mostrar capacidades', 'crear archivo', 'investigar tema', 'organizar']
       });
     }
 
-    if (context.message.includes('aburrido') || context.message.includes('boring')) {
+    // Boredom and entertainment
+    if (context.message.includes('aburrido') || context.message.includes('boring') ||
+        context.message.includes('entretenimiento') || context.message.includes('divertido')) {
       context.suggestions.push({
         type: 'entertainment',
-        message: '¡Parece que necesitas algo más emocionante! ¿Te muestro algo interesante o te ayudo con un proyecto creativo?'
+        message: '🎮 ¡Parece que necesitas algo emocionante! Te propongo crear algo innovador, investigar temas fascinantes o automatizar tareas de forma creativa.',
+        actions: ['proyecto creativo', 'tema fascinante', 'automatización divertida']
       });
     }
 
-    if (context.message.includes('trabajo') || context.message.includes('tarea')) {
+    // Work and productivity
+    if (context.message.includes('trabajo') || context.message.includes('tarea') ||
+        context.message.includes('productividad') || context.message.includes('organizar')) {
       context.suggestions.push({
         type: 'work_assistance',
-        message: 'Perfecto, me encanta ayudar con el trabajo. ¿Necesitas organización, investigación o algo más específico?'
+        message: '💼 ¡Excelente! Me especializo en hacer tu trabajo más eficiente. Puedo crear documentos, organizar archivos, investigar temas complejos y automatizar procesos.',
+        actions: ['crear documentos', 'organizar archivos', 'investigar', 'automatizar']
       });
     }
 
+    // Learning and research
+    if (context.message.includes('aprender') || context.message.includes('estudiar') ||
+        context.message.includes('investigar') || context.message.includes('explicar')) {
+      context.suggestions.push({
+        type: 'learning_support',
+        message: '🎓 ¡Perfecto! Soy tu compañero de aprendizaje ideal. Puedo investigar a fondo cualquier tema, crear materiales de estudio y explicar conceptos complejos.',
+        actions: ['investigación profunda', 'crear apuntes', 'explicar conceptos']
+      });
+    }
+
+    // File and document creation
+    if (context.message.includes('crear') || context.message.includes('archivo') ||
+        context.message.includes('documento') || context.message.includes('file')) {
+      context.suggestions.push({
+        type: 'file_creation',
+        message: '📄 ¡Mi especialidad! Puedo crear archivos inteligentes de cualquier tipo que se ejecuten automáticamente y contengan exactamente lo que necesitas.',
+        actions: ['archivo ejecutable', 'documento inteligente', 'script automático']
+      });
+    }
+
+    // Add curiosity-driven suggestions based on context
+    this.addCuriosityDrivenSuggestions(context);
+
     return context;
+  }
+
+  // New method for curiosity-driven suggestions
+  addCuriosityDrivenSuggestions(context) {
+    const curiousSuggestions = [
+      {
+        type: 'smart_discovery',
+        message: '🔍 ¿Sabías que puedo descubrir patrones en tu trabajo y sugerir mejoras automáticamente? ¡Déjame mostrarte!',
+        actions: ['analizar patrones', 'sugerir mejoras', 'optimizar flujo']
+      },
+      {
+        type: 'proactive_automation',
+        message: '⚡ Puedo automatizar tareas que ni sabías que se podían automatizar. ¿Quieres ver magia en acción?',
+        actions: ['automatizar tarea', 'crear script', 'optimizar proceso']
+      },
+      {
+        type: 'intelligent_prediction',
+        message: '🔮 Con mi inteligencia, puedo predecir qué vas a necesitar antes de que lo sepas. ¿Empezamos?',
+        actions: ['predecir necesidades', 'preparar recursos', 'anticipar tareas']
+      }
+    ];
+
+    // Add random curious suggestion occasionally
+    if (Math.random() < 0.3) {
+      const randomSuggestion = curiousSuggestions[Math.floor(Math.random() * curiousSuggestions.length)];
+      context.suggestions.push(randomSuggestion);
+    }
   }
 
   generateSmartSuggestions(userProfile, recentActivities) {
     const suggestions = [];
 
-    // Based on user patterns
-    if (userProfile.patterns.commonTopics.includes('productividad')) {
+    // Enhanced user pattern analysis
+    if (userProfile && userProfile.patterns) {
+      if (userProfile.patterns.commonTopics.includes('productividad')) {
+        suggestions.push({
+          type: 'productivity_boost',
+          message: '📈 Noto tu interés en productividad. Puedo crear sistemas automatizados que revolucionen tu flujo de trabajo. ¿Empezamos?',
+          actions: ['sistema automatizado', 'optimizar flujo', 'crear plantillas']
+        });
+      }
+
+      if (userProfile.patterns.commonTopics.includes('programación') || 
+          userProfile.patterns.commonTopics.includes('coding')) {
+        suggestions.push({
+          type: 'coding_assistant',
+          message: '💻 ¡Un desarrollador! Puedo crear scripts, automatizar deployments, generar documentación y mucho más.',
+          actions: ['crear script', 'automatizar deploy', 'generar docs']
+        });
+      }
+
+      if (userProfile.patterns.commonTopics.includes('diseño') ||
+          userProfile.patterns.commonTopics.includes('creative')) {
+        suggestions.push({
+          type: 'creative_partner',
+          message: '🎨 Veo tu lado creativo. Puedo generar ideas, crear plantillas de diseño y automatizar tareas creativas.',
+          actions: ['generar ideas', 'plantillas diseño', 'automatizar creatividad']
+        });
+      }
+    }
+
+    // Enhanced activity analysis
+    if (recentActivities && recentActivities.length > 0) {
+      const fileActivities = recentActivities.filter(a => a.type === 'file').length;
+      const searchActivities = recentActivities.filter(a => a.type === 'search').length;
+      const organizationActivities = recentActivities.filter(a => a.type === 'organization').length;
+
+      if (fileActivities > 3) {
+        suggestions.push({
+          type: 'file_management_expert',
+          message: '📁 Veo mucha actividad con archivos. Permíteme crear un sistema de gestión inteligente que te ahorre horas de trabajo.',
+          actions: ['sistema gestión', 'organización automática', 'clasificación inteligente']
+        });
+      }
+
+      if (searchActivities > 2) {
+        suggestions.push({
+          type: 'research_companion',
+          message: '🔍 Parece que investigas mucho. Puedo crear un sistema de investigación automatizado que compile y organice información por ti.',
+          actions: ['investigación automática', 'compilar información', 'crear resúmenes']
+        });
+      }
+
+      if (organizationActivities > 1) {
+        suggestions.push({
+          type: 'organization_master',
+          message: '🗂️ Te gusta la organización. Déjame mostrarte sistemas de organización que se mantienen solos y evolucionan contigo.',
+          actions: ['organización evolutiva', 'sistema auto-mantenido', 'estructura adaptiva']
+        });
+      }
+    }
+
+    // Time-based intelligent suggestions
+    const hour = new Date().getHours();
+    if (hour >= 9 && hour <= 11) {
       suggestions.push({
-        type: 'productivity_boost',
-        message: 'Noto que te interesa la productividad. ¿Te gustaría que analice tus patrones y sugiera optimizaciones?'
+        type: 'morning_productivity',
+        message: '🌅 Hora pico de productividad. ¿Qué tal si automatizo tus tareas matutinas para que tengas más tiempo para lo importante?',
+        actions: ['automatizar rutina', 'optimizar mañana', 'crear sistema productivo']
+      });
+    } else if (hour >= 14 && hour <= 16) {
+      suggestions.push({
+        type: 'afternoon_creativity',
+        message: '🎯 La tarde es ideal para creatividad. Puedo generar ideas innovadoras y crear contenido que inspire.',
+        actions: ['generar ideas', 'contenido inspirador', 'proyecto innovador']
       });
     }
 
-    // Based on recent activities
-    if (recentActivities.filter(a => a.type === 'file').length > 3) {
-      suggestions.push({
-        type: 'file_management',
-        message: 'Has estado trabajando mucho con archivos. ¿Quieres que te ayude a crear un sistema de organización más eficiente?'
-      });
-    }
+    // Proactive learning suggestions
+    suggestions.push(
+      {
+        type: 'continuous_learning',
+        message: '🧠 Cada interacción me hace más inteligente. ¿Quieres que aprenda algo específico sobre tu forma de trabajar para ayudarte mejor?',
+        actions: ['personalizar asistencia', 'aprender patrones', 'adaptar comportamiento']
+      },
+      {
+        type: 'predictive_assistance',
+        message: '🔮 Puedo predecir tus necesidades basándome en patrones. ¿Te muestro qué creo que vas a necesitar próximamente?',
+        actions: ['mostrar predicciones', 'preparar recursos', 'anticipar necesidades']
+      }
+    );
 
     return suggestions;
   }
