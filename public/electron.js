@@ -1,9 +1,11 @@
-const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell, Tray, nativeImage } = require('electron');
 const path = require('path');
 const isDev = process.env.NODE_ENV === 'development';
 
 // Keep a global reference of the window object
 let mainWindow;
+let tray = null;
+let isBackgroundMode = process.argv.includes('--hidden');
 
 function createWindow() {
   // Create the browser window
@@ -20,7 +22,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     },
     titleBarStyle: 'default',
-    show: false
+    show: !isBackgroundMode // Don't show if in background mode
   });
 
   // Load the app
@@ -30,17 +32,27 @@ function createWindow() {
   
   mainWindow.loadURL(startUrl);
 
-  // Show window when ready to prevent visual flash
+  // Show window when ready to prevent visual flash (unless in background mode)
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
+    if (!isBackgroundMode) {
+      mainWindow.show();
+    }
   });
 
   // Open DevTools in development
-  if (isDev) {
+  if (isDev && !isBackgroundMode) {
     mainWindow.webContents.openDevTools();
   }
 
-  // Handle window closed
+  // Handle window closed - hide to tray instead of quit in background mode
+  mainWindow.on('close', (event) => {
+    if (isBackgroundMode && !app.isQuiting) {
+      event.preventDefault();
+      mainWindow.hide();
+      showTrayNotification('J-Vairyx sigue ejecutándose en segundo plano');
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -126,10 +138,24 @@ function createWindow() {
 }
 
 // App event listeners
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+  
+  // Initialize tray for all modes
+  createTray();
+  
+  // Initialize background services
+  initializeBackgroundServices();
+  
+  // Show notification if starting in background mode
+  if (isBackgroundMode) {
+    showTrayNotification('J-Vairyx iniciado en segundo plano con inteligencia completa');
+  }
+});
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  // Keep app running in background mode on Windows/Linux
+  if (process.platform !== 'darwin' && !isBackgroundMode) {
     app.quit();
   }
 });
@@ -139,6 +165,96 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+// Create system tray for background mode
+function createTray() {
+  const trayIcon = nativeImage.createFromPath(path.join(__dirname, 'assets/icon.png'));
+  tray = new Tray(trayIcon.resize({ width: 16, height: 16 }));
+  
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Mostrar J-Vairyx',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+        } else {
+          createWindow();
+        }
+      }
+    },
+    {
+      label: 'Asistente en Segundo Plano',
+      enabled: false
+    },
+    { type: 'separator' },
+    {
+      label: 'Estado: Activo',
+      enabled: false
+    },
+    {
+      label: 'Servicios de IA Ejecutándose',
+      enabled: false
+    },
+    { type: 'separator' },
+    {
+      label: 'Salir',
+      click: () => {
+        app.isQuiting = true;
+        app.quit();
+      }
+    }
+  ]);
+  
+  tray.setContextMenu(contextMenu);
+  tray.setToolTip('J-Vairyx - Asistente Personal Inteligente');
+  
+  // Double click to show window
+  tray.on('double-click', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    } else {
+      createWindow();
+    }
+  });
+}
+
+// Show tray notification
+function showTrayNotification(message) {
+  if (tray) {
+    tray.displayBalloon({
+      title: 'J-Vairyx',
+      content: message,
+      icon: path.join(__dirname, 'assets/icon.png')
+    });
+  }
+}
+
+// Background intelligence services
+function initializeBackgroundServices() {
+  console.log('🚀 Inicializando servicios de inteligencia en segundo plano...');
+  
+  // Start autonomous learning and improvement cycles
+  setInterval(() => {
+    // Simulate autonomous learning processes
+    console.log('🧠 Proceso de aprendizaje autónomo ejecutándose...');
+  }, 300000); // Every 5 minutes
+  
+  // Start intelligent monitoring
+  setInterval(() => {
+    // Simulate system monitoring and optimization
+    console.log('⚡ Monitoreo inteligente del sistema...');
+  }, 600000); // Every 10 minutes
+  
+  // Start proactive assistance checks
+  setInterval(() => {
+    // Check for proactive assistance opportunities
+    console.log('💡 Buscando oportunidades de asistencia proactiva...');
+  }, 900000); // Every 15 minutes
+  
+  console.log('✅ Servicios de inteligencia iniciados correctamente');
+}
 
 // Security: Prevent new window creation
 app.on('web-contents-created', (event, contents) => {

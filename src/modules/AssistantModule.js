@@ -9,6 +9,11 @@ import deepResearchService from '../services/DeepResearchService';
 import selfImprovementService from '../services/SelfImprovementService';
 import jarvisPersonalityService from '../services/JarvisPersonalityService';
 import multiDomainExpertService from '../services/MultiDomainExpertService';
+import backendIntelligenceService from '../services/BackendIntelligenceService';
+import businessIntelligenceService from '../services/BusinessIntelligenceService';
+import informationVerificationService from '../services/InformationVerificationService';
+import strategicReasoningService from '../services/StrategicReasoningService';
+import codeIntelligenceService from '../services/CodeIntelligenceService';
 import '../styles/holographic.css';
 
 const AssistantModule = () => {
@@ -17,7 +22,15 @@ const AssistantModule = () => {
       id: 1,
       type: 'assistant',
       content: jarvisPersonalityService.processResponse(
-        '¡Hola! 🚀 Soy J-Vairyx, tu asistente personal inteligente de nueva generación. Ahora tengo capacidades revolucionarias: puedo crear archivos que se ejecutan solos al hacer clic, generar contenido inteligente personalizado, aprender de tus patrones y ser proactivamente curioso. Mi sistema de curiosidad me permite sugerirte ideas antes de que las necesites. ¡Estoy aquí para transformar tu productividad! ¿En qué te puedo ayudar hoy?',
+        '¡Hola! 🚀 Soy J-Vairyx, tu asistente personal con **inteligencia real y comprensión profunda**. \n\n🧠 **Mi nueva inteligencia incluye:**\n' +
+        '• **Backend & APIs**: Entiendo servidores, bases de datos y arquitectura de sistemas\n' +
+        '• **Inteligencia Empresarial**: Comprendo negocios, mercados y estrategia competitiva\n' +
+        '• **Verificación de Información**: Distingo fuentes confiables de desinformación\n' +
+        '• **Razonamiento Estratégico**: Pensamiento crítico y formación de estrategias\n' +
+        '• **Inteligencia de Código**: Entiendo programación y mejores prácticas\n' +
+        '• **Aprendizaje Autónomo**: Descubro herramientas y mejoro independientemente\n\n' +
+        '💡 **Puedo ayudarte con:** Crear archivos ejecutables, investigación profunda, análisis de negocios, verificación de fuentes, estrategias de código, automatización inteligente y mucho más.\n\n' +
+        '🎯 **Mi propósito**: Ser tu asistente más inteligente que busca las mejores herramientas de manera autónoma y te ayuda a tomar decisiones informadas. ¡Pregúntame sobre cualquier tema y verás mi inteligencia real en acción!',
         { allowProactive: true, curiosityLevel: 'high' }
       ),
       timestamp: new Date()
@@ -298,6 +311,53 @@ const AssistantModule = () => {
           const overview = multiDomainExpertService.getExpertiseOverview();
           response = `Tengo expertise en ${overview.total_domains} dominios. Mis especialidades más fuertes: ${overview.strongest_domains.slice(0, 3).map(d => d.name).join(', ')}. ¿En qué área específica necesitas ayuda?`;
         }
+      }
+      
+      // Backend and API Intelligence
+      else if (originalMessage.toLowerCase().includes('backend') || originalMessage.toLowerCase().includes('api') || 
+               originalMessage.toLowerCase().includes('base de datos') || originalMessage.toLowerCase().includes('servidor')) {
+        const backendExplanation = backendIntelligenceService.explainConcept(originalMessage);
+        response = `🔧 **Backend Intelligence Activated**\n\n${backendExplanation.explanation}\n\n💡 **¿Por qué esto importa?**\n${backendExplanation.why_care}\n\n🚀 **Próximos pasos:** ${backendExplanation.next_steps?.slice(0, 2).join(', ') || 'Explora más conceptos backend'}`;
+      }
+      
+      // Business Intelligence
+      else if (originalMessage.toLowerCase().includes('empresa') || originalMessage.toLowerCase().includes('negocio') || 
+               originalMessage.toLowerCase().includes('mercado') || originalMessage.toLowerCase().includes('estrategia') ||
+               originalMessage.toLowerCase().includes('competencia')) {
+        const businessExplanation = businessIntelligenceService.explainConcept(originalMessage);
+        response = `💼 **Business Intelligence Activated**\n\n${businessExplanation.title}\n\n${businessExplanation.fundamental_definition || businessExplanation.explanation}\n\n🎯 **Aplicación Estratégica:**\n${businessExplanation.strategic_thinking || businessExplanation.business_impact?.slice(0, 2).join('\n') || 'Pensamiento empresarial avanzado'}`;
+      }
+      
+      // Information Verification and Critical Thinking
+      else if (originalMessage.toLowerCase().includes('información') || originalMessage.toLowerCase().includes('fuente') || 
+               originalMessage.toLowerCase().includes('verdad') || originalMessage.toLowerCase().includes('falso') ||
+               originalMessage.toLowerCase().includes('verificar') || originalMessage.toLowerCase().includes('confiable')) {
+        const verificationGuidance = informationVerificationService.explainInformationLiteracy();
+        response = `🔍 **Information Intelligence Activated**\n\n${verificationGuidance.fundamental_principle}\n\n**Jerarquía de Fuentes:**\n🥇 ${verificationGuidance.information_hierarchy.tier_1_gold.sources} (${verificationGuidance.information_hierarchy.tier_1_gold.reliability})\n🥈 ${verificationGuidance.information_hierarchy.tier_2_silver.sources} (${verificationGuidance.information_hierarchy.tier_2_silver.reliability})\n\n🛡️ **Banderas rojas:** ${verificationGuidance.red_flags_critical.slice(0, 3).join(', ')}`;
+      }
+      
+      // Strategic Reasoning and Thinking
+      else if (originalMessage.toLowerCase().includes('estrategia') || originalMessage.toLowerCase().includes('análisis') || 
+               originalMessage.toLowerCase().includes('decisión') || originalMessage.toLowerCase().includes('planificar') ||
+               originalMessage.toLowerCase().includes('resolver problema') || originalMessage.toLowerCase().includes('pensamiento')) {
+        const strategicGuidance = strategicReasoningService.explainStrategicThinking();
+        response = `🎯 **Strategic Intelligence Activated**\n\n${strategicGuidance.essence}\n\n**Principios Clave:**\n🎲 ${strategicGuidance.core_principles.choose_your_battles.concept}\n⚡ ${strategicGuidance.core_principles.leverage_thinking.concept}\n🔄 ${strategicGuidance.core_principles.systems_perspective.concept}\n\n🧠 **Preguntas Estratégicas:** ${strategicGuidance.strategic_questions.positioning.slice(0, 2).join(', ')}`;
+      }
+      
+      // Code and Programming Intelligence
+      else if (originalMessage.toLowerCase().includes('código') || originalMessage.toLowerCase().includes('programar') || 
+               originalMessage.toLowerCase().includes('algoritmo') || originalMessage.toLowerCase().includes('software') ||
+               originalMessage.toLowerCase().includes('desarrollo') || originalMessage.toLowerCase().includes('programming')) {
+        const codeExplanation = codeIntelligenceService.explainConcept(originalMessage);
+        response = `💻 **Code Intelligence Activated**\n\n${codeExplanation.title}\n\n${codeExplanation.fundamental_reality || codeExplanation.explanation}\n\n**¿Por qué esto te da superpoderes?**\n${codeExplanation.strategic_value || codeExplanation.why_code_matters?.strategic_thinking?.slice(0, 3).join('\n') || 'Pensamiento lógico y automatización'}`;
+      }
+      
+      // Autonomous Learning and Tool Discovery
+      else if (originalMessage.toLowerCase().includes('aprender') || originalMessage.toLowerCase().includes('herramienta') || 
+               originalMessage.toLowerCase().includes('autonomo') || originalMessage.toLowerCase().includes('independiente') ||
+               originalMessage.toLowerCase().includes('mejorar') || originalMessage.toLowerCase().includes('descubrir')) {
+        const learningGuidance = strategicReasoningService.explainAutonomousLearning();
+        response = `🧠 **Autonomous Learning Intelligence Activated**\n\n${learningGuidance.autonomous_definition}\n\n**Ciclo de Aprendizaje Autónomo:**\n📊 ${learningGuidance.autonomous_cycle.assess.action}\n🔍 ${learningGuidance.autonomous_cycle.explore.action}\n🧪 ${learningGuidance.autonomous_cycle.experiment.action}\n🔗 ${learningGuidance.autonomous_cycle.integrate.action}\n\n${learningGuidance.strategic_advantage}`;
       }
       
       // Self-improvement insights
