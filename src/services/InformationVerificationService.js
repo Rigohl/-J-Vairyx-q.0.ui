@@ -886,8 +886,9 @@ Tu capacidad para distinguir información confiable de desinformación determina
 
   // Utility methods
   calculateSourceCredibility(source) {
-    // Implementation would analyze various factors
-    return Math.random() * 0.3 + 0.7; // Placeholder
+    // TODO: Implement real source credibility calculation logic.
+    // This is a development placeholder and MUST be implemented before production use.
+    throw new Error('calculateSourceCredibility is not implemented. Replace placeholder before production.');
   }
 
   identifyBiasIndicators(source) {
