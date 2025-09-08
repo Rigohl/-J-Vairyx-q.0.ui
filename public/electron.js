@@ -200,7 +200,7 @@ function createTray() {
     {
       label: 'Salir',
       click: () => {
-        app.isQuiting = true;
+        app.isQuitting = true;
         app.quit();
       }
     }
