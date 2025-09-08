@@ -360,7 +360,7 @@ class StrategicReasoningService {
   initializeAutonomousReasoning() {
     return {
       self_directed_learning: {
-        identify_gaps: 'Recognize what you don\'t know',
+        identify_gaps: 'Recognize what you don’t know',
         find_resources: 'Locate high-quality learning materials',
         practice_application: 'Apply knowledge in real contexts',
         seek_feedback: 'Get input on performance and understanding',
