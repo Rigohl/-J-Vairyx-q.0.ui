@@ -886,9 +886,50 @@ Tu capacidad para distinguir información confiable de desinformación determina
 
   // Utility methods
   calculateSourceCredibility(source) {
-    // TODO: Implement real source credibility calculation logic.
-    // This is a development placeholder and MUST be implemented before production use.
-    throw new Error('calculateSourceCredibility is not implemented. Replace placeholder before production.');
+    // Basic credibility scoring based on known sources and domain patterns
+    const normalizedSource = this._normalizeSourceName(source);
+    const generalSources = this.getGeneralSources();
+    const reliableSourcesList = [
+      ...generalSources.news,
+      ...generalSources.fact_checking,
+      ...generalSources.reference
+    ].map(s => this._normalizeSourceName(s));
+
+    // High score for exact match with reliable sources
+    if (reliableSourcesList.includes(normalizedSource)) {
+      return 0.98;
+    }
+
+    // Medium-high score for .gov or .edu domains
+    if (typeof source === 'string' && (source.includes('.gov') || source.includes('.edu'))) {
+      return 0.95;
+    }
+
+    // Medium score for known news organizations
+    const newsPatterns = ['reuters', 'associated press', 'bbc', 'npr', 'propublica'];
+    if (newsPatterns.some(pattern => normalizedSource.includes(pattern))) {
+      return 0.92;
+    }
+
+    // Medium score for known fact-checkers
+    const factCheckPatterns = ['snopes', 'factcheck.org', 'politifact', 'allsides'];
+    if (factCheckPatterns.some(pattern => normalizedSource.includes(pattern))) {
+      return 0.90;
+    }
+
+    // Lower score for Wikipedia (as a starting point)
+    if (normalizedSource.includes('wikipedia')) {
+      return 0.75;
+    }
+
+    // Default: assign a moderate score
+    return 0.6;
+  }
+
+  // Helper to normalize source names for comparison
+  _normalizeSourceName(source) {
+    if (typeof source !== 'string') return '';
+    return source.trim().toLowerCase().replace(/[^a-z0-9\. ]/g, '');
   }
 
   identifyBiasIndicators(source) {
