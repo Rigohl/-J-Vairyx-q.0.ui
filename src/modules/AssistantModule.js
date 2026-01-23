@@ -14,6 +14,8 @@ import businessIntelligenceService from '../services/BusinessIntelligenceService
 import informationVerificationService from '../services/InformationVerificationService';
 import strategicReasoningService from '../services/StrategicReasoningService';
 import codeIntelligenceService from '../services/CodeIntelligenceService';
+import databaseService from '../services/DatabaseService';
+import documentAnalysisService from '../services/DocumentAnalysisService';
 import '../styles/holographic.css';
 
 const AssistantModule = () => {
@@ -315,9 +317,46 @@ const AssistantModule = () => {
       
       // Backend and API Intelligence
       else if (originalMessage.toLowerCase().includes('backend') || originalMessage.toLowerCase().includes('api') || 
-               originalMessage.toLowerCase().includes('base de datos') || originalMessage.toLowerCase().includes('servidor')) {
+               originalMessage.toLowerCase().includes('servidor')) {
         const backendExplanation = backendIntelligenceService.explainConcept(originalMessage);
         response = `🔧 **Backend Intelligence Activated**\n\n${backendExplanation.explanation}\n\n💡 **¿Por qué esto importa?**\n${backendExplanation.why_care}\n\n🚀 **Próximos pasos:** ${backendExplanation.next_steps?.slice(0, 2).join(', ') || 'Explora más conceptos backend'}`;
+      }
+      
+      // Database operations and intelligent storage
+      else if (originalMessage.toLowerCase().includes('crear base de datos')) {
+        const dbName = extractDatabaseName(originalMessage) || 'user_database';
+        const result = databaseService.createDatabase(dbName, { 
+          description: `Database created by user request: ${originalMessage}`,
+          autoIndex: true
+        });
+        response = result.success ? 
+          `🗄️ Base de datos "${dbName}" creada exitosamente con capacidades inteligentes de búsqueda e indexación automática. Puedo almacenar y buscar información instantáneamente. ${result.message}` :
+          `❌ Error creando base de datos: ${result.error}`;
+      }
+      else if (originalMessage.toLowerCase().includes('buscar en base') || originalMessage.toLowerCase().includes('buscar dato')) {
+        const query = extractSearchQuery(originalMessage);
+        const searchResult = databaseService.search(query, { fuzzy: true, maxResults: 10 });
+        response = searchResult.totalFound > 0 ?
+          `🔍 Encontré ${searchResult.totalFound} resultados para "${query}" en ${searchResult.searchedDatabases.length} bases de datos (búsqueda completada en ${searchResult.queryTime}ms). Los resultados más relevantes están relacionados con ${searchResult.results.slice(0, 3).map(r => r.database).join(', ')}.` :
+          `🔍 No encontré resultados para "${query}" en las bases de datos. ¿Quieres que cree una nueva base de datos o busque en internet?`;
+      }
+      else if (originalMessage.toLowerCase().includes('estadística') && originalMessage.toLowerCase().includes('base')) {
+        const stats = databaseService.getDatabaseStatistics();
+        const recommendations = databaseService.getPersonalizedRecommendations();
+        response = `📊 Estado de bases de datos: ${stats.totalDatabases} bases activas, ${stats.totalRecords} registros totales, ${stats.totalQueries} consultas realizadas. Tiempo promedio de consulta: ${stats.averageQueryTime.toFixed(2)}ms. ${recommendations.length > 0 ? `Tengo ${recommendations.length} recomendaciones basadas en tus datos.` : ''}`;
+      }
+      
+      // Document analysis capabilities
+      else if (originalMessage.toLowerCase().includes('analizar documento')) {
+        const fileName = extractFileName(originalMessage) || 'document.pdf';
+        const analysisResult = await documentAnalysisService.analyzeDocument(fileName, null, { comprehensive: true });
+        response = analysisResult.success ?
+          `📄 Análisis completado de "${fileName}": ${analysisResult.insights.readabilityScore.toFixed(1)}% de legibilidad, ${analysisResult.insights.keyTopics.slice(0, 3).join(', ')} como temas clave. ${analysisResult.insights.actionableInsights.slice(0, 2).join('. ')}` :
+          `❌ Error analizando documento: ${analysisResult.error}`;
+      }
+      else if (originalMessage.toLowerCase().includes('estadística') && originalMessage.toLowerCase().includes('documento')) {
+        const stats = documentAnalysisService.getAnalysisStatistics();
+        response = `📊 He analizado ${stats.metrics.totalAnalyzed} documentos (legibilidad promedio: ${stats.metrics.averageReadability.toFixed(1)}%, tiempo promedio: ${stats.metrics.averageAnalysisTime.toFixed(0)}ms). Categorías: ${stats.categories.length} identificadas. Recomendaciones de mejora disponibles.`;
       }
       
       // Business Intelligence
@@ -495,6 +534,16 @@ const AssistantModule = () => {
       }
     }
     return 'general';
+  };
+
+  const extractDatabaseName = (message) => {
+    const match = message.match(/(?:base de datos|database)\s+["']?(\w+)["']?/i);
+    return match ? match[1] : null;
+  };
+
+  const extractSearchQuery = (message) => {
+    const match = message.match(/buscar\s+(?:en\s+base\s+)?["']?(.+?)["']?\s*(?:en|$)/i);
+    return match ? match[1].trim() : message.replace(/buscar\s+(?:en\s+base\s+)?/i, '').trim();
   };
 
   const determineUserActivity = (message) => {
