@@ -500,6 +500,12 @@ const AssistantModule = () => {
   };
 
   const extractSearchQuery = (message) => {
+    // Check if it's a database search or web search
+    if (message.toLowerCase().includes('buscar en base') || message.toLowerCase().includes('buscar dato')) {
+      const match = message.match(/buscar\s+(?:en\s+base\s+)?["']?(.+?)["']?\s*(?:en|$)/i);
+      return match ? match[1].trim() : message.replace(/buscar\s+(?:en\s+base\s+)?/i, '').trim();
+    }
+    // Web search
     const match = message.match(/buscar (?:en internet |web )?["`']?([^"`']+)["`']?/i);
     return match ? match[1] : 'información general';
   };
@@ -539,11 +545,6 @@ const AssistantModule = () => {
   const extractDatabaseName = (message) => {
     const match = message.match(/(?:base de datos|database)\s+["']?(\w+)["']?/i);
     return match ? match[1] : null;
-  };
-
-  const extractSearchQuery = (message) => {
-    const match = message.match(/buscar\s+(?:en\s+base\s+)?["']?(.+?)["']?\s*(?:en|$)/i);
-    return match ? match[1].trim() : message.replace(/buscar\s+(?:en\s+base\s+)?/i, '').trim();
   };
 
   const determineUserActivity = (message) => {
