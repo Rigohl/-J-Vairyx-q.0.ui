@@ -46,7 +46,7 @@ function createWindow() {
 
   // Handle window closed - hide to tray instead of quit in background mode
   mainWindow.on('close', (event) => {
-    if (isBackgroundMode && !app.isQuiting) {
+    if (isBackgroundMode && !app.isQuitting) {
       event.preventDefault();
       mainWindow.hide();
       showTrayNotification('J-Vairyx sigue ejecutándose en segundo plano');
