@@ -46,7 +46,8 @@
     "concurrently": "^9.2.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "wait-on": "^8.0.4"
+    "wait-on": "^8.0.4",
+    "@tensorflow/tfjs": "^4.20.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.3",
