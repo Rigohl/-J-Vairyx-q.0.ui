@@ -101,9 +101,10 @@ const AssistantModule = () => {
     
     // Initial proactive message after 30 seconds
     const initialTimeout = setTimeout(() => {
-      const welcomeProactive = jarvisPersonalityService.generateProactiveMessage('morning_briefing', {
+      const welcomeProactive = jarvisPersonalityService.generateProactiveMessage('time_based', {
         tasks: 'several priority items',
-        user_activity: 'initialization'
+        user_activity: 'initialization',
+        subtype: 'morning_briefing'
       });
       
       const welcomeMsg = {
