@@ -11,7 +11,10 @@
     "build": "webpack --mode production",
     "electron-pack": "electron-builder build",
     "dist": "npm run build && npm run electron-pack",
-    "test": "echo \"No tests specified yet\" && exit 0"
+    "test": "echo \"No tests specified yet\" && exit 0",
+    "start-background": "electron . --hidden",
+    "install-service": "npm run build && electron-builder install-service",
+    "service": "node scripts/windows-service.js"
   },
   "keywords": ["personal-assistant", "electron", "desktop", "vairyx", "jarvis"],
   "author": "Rigoberto Huston Laredo",
