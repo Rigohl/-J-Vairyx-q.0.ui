@@ -474,6 +474,11 @@ class DeepResearchService {
       });
     });
     
+    if (totalResults === 0) {
+      // No resultados de alta calidad disponibles; evitar división por cero y NaN
+      return 'low';
+    }
+    
     const averageQuality = qualityScore / totalResults;
     
     if (averageQuality > 0.8) return 'high';
