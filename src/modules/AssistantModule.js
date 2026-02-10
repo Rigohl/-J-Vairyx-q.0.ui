@@ -508,33 +508,38 @@ const AssistantModule = () => {
             </div>
           </div>
 
-          <div className="status-section">
-            <h4>⚙️ Estado del Sistema</h4>
-            <div className="status-item">
-              <span className="status-label">Salud:</span>
-              <span className="status-value">
-                {(() => {
-                  const status = selfImprovementService.getImprovementStatus();
-                  return status.overall_health === 'Excelente' ? '🟢' :
-                         status.overall_health === 'Bueno' ? '🟡' :
-                         status.overall_health === 'Aceptable' ? '🟠' : '🔴';
-                })()}
-                {selfImprovementService.getImprovementStatus().overall_health}
-              </span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Mejoras:</span>
-              <span className="status-value">
-                {selfImprovementService.getImprovementStatus().pending_improvements} pendientes
-              </span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Personalidad:</span>
-              <span className="status-value">
-                {jarvisPersonalityService.getPersonalityInsights().sophistication_level > 0.8 ? '🎩 Sofisticado' : '🤖 Estándar'}
-              </span>
-            </div>
-          </div>
+          {(() => {
+            const status = selfImprovementService.getImprovementStatus();
+            const healthIcon =
+              status.overall_health === 'Excelente' ? '🟢' :
+              status.overall_health === 'Bueno' ? '🟡' :
+              status.overall_health === 'Aceptable' ? '🟠' : '🔴';
+
+            return (
+              <div className="status-section">
+                <h4>⚙️ Estado del Sistema</h4>
+                <div className="status-item">
+                  <span className="status-label">Salud:</span>
+                  <span className="status-value">
+                    {healthIcon}
+                    {status.overall_health}
+                  </span>
+                </div>
+                <div className="status-item">
+                  <span className="status-label">Mejoras:</span>
+                  <span className="status-value">
+                    {status.pending_improvements} pendientes
+                  </span>
+                </div>
+                <div className="status-item">
+                  <span className="status-label">Personalidad:</span>
+                  <span className="status-value">
+                    {jarvisPersonalityService.getPersonalityInsights().sophistication_level > 0.8 ? '🎩 Sofisticado' : '🤖 Estándar'}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
