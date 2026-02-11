@@ -1,62 +1,28 @@
 {
   "name": "j-vairyx-q.0.ui",
-  "version": "0.0.1",
-  "description": "J-Vairyx Personal Assistant - Desktop Application",
-  "main": "public/electron.js",
-  "homepage": "./",
+  "version": "0.1.0",
+  "description": "J-Vairyx Personal Assistant - Hybrid Desktop Application (Rust, Mojo, Julia)",
+  "main": "index.js",
   "scripts": {
-    "start": "concurrently \"npm run react-start\" \"wait-on http://localhost:3000 && npm run electron\"",
+    "start": "tauri dev",
     "react-start": "webpack serve --mode development",
-    "electron": "electron .",
-    "build": "webpack --mode production",
-    "electron-pack": "electron-builder build",
-    "dist": "npm run build && npm run electron-pack",
-    "test": "echo \"No tests specified yet\" && exit 0",
-    "start-background": "electron . --hidden",
-    "install-service": "npm run build && electron-builder install-service",
-    "service": "node scripts/windows-service.js"
+    "build": "tauri build"
   },
-  "keywords": ["personal-assistant", "electron", "desktop", "vairyx", "jarvis"],
+  "keywords": ["personal-assistant", "tauri", "rust", "mojo", "julia", "vairyx"],
   "author": "Rigoberto Huston Laredo",
   "license": "MIT",
-  "build": {
-    "appId": "com.rigohl.jvairyxui",
-    "productName": "J-Vairyx Personal Assistant",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "build/**/*",
-      "public/electron.js",
-      "public/preload.js",
-      "node_modules/**/*"
-    ],
-    "mac": {
-      "category": "public.app-category.productivity"
-    },
-    "win": {
-      "target": "nsis"
-    },
-    "linux": {
-      "target": "AppImage"
-    }
-  },
   "dependencies": {
-    "@electron/rebuild": "^3.7.2",
-    "concurrently": "^9.2.1",
+    "@tauri-apps/api": "^1.5.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1",
-    "wait-on": "^8.0.4",
-    "@tensorflow/tfjs": "^4.20.0"
+    "react-dom": "^19.1.1"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^1.5.0",
     "@babel/core": "^7.28.3",
     "@babel/preset-env": "^7.28.3",
     "@babel/preset-react": "^7.27.1",
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
-    "electron": "^37.4.0",
-    "electron-builder": "^26.0.12",
     "html-webpack-plugin": "^5.6.4",
     "style-loader": "^4.0.0",
     "webpack": "^5.101.3",
