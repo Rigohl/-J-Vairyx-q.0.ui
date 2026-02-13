@@ -6,15 +6,21 @@
   "scripts": {
     "start": "tauri dev",
     "react-start": "webpack serve --mode development",
-    "build": "tauri build"
+    "build": "tauri build",
+    "electron": "electron .",
+    "electron-pack": "electron-builder build",
+    "dist": "npm run build && npm run electron-pack"
   },
-  "keywords": ["personal-assistant", "tauri", "rust", "mojo", "julia", "vairyx"],
+  "keywords": ["personal-assistant", "tauri", "rust", "mojo", "julia", "vairyx", "electron", "desktop"],
   "author": "Rigoberto Huston Laredo",
   "license": "MIT",
   "dependencies": {
     "@tauri-apps/api": "^1.5.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "@electron/rebuild": "^3.7.2",
+    "concurrently": "^9.2.1",
+    "wait-on": "^8.0.4"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^1.5.0",
@@ -23,6 +29,8 @@
     "@babel/preset-react": "^7.27.1",
     "babel-loader": "^10.0.0",
     "css-loader": "^7.1.2",
+    "electron": "^37.4.0",
+    "electron-builder": "^26.0.12",
     "html-webpack-plugin": "^5.6.4",
     "style-loader": "^4.0.0",
     "webpack": "^5.101.3",
