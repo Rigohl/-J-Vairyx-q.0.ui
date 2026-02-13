@@ -1,1 +1,36 @@
-Nothing to output - the change list contains only a markdown documentation file (.md) which should not be ignored.
+
+# Build outputs
+# Coverage
+# Electron
+# Environment variables
+# IDE
+# OS
+# Runtime data
+# Temporary files
+*.log
+*.pid
+*.pid.lock
+*.seed
+*.swo
+*.swp
+*.temp
+*.tmp
+.DS_Store
+.env
+.env.development.local
+.env.local
+.env.production.local
+.env.test.local
+.idea/
+.vscode/
+Nothing to output - the change list contains only a markdown documentation file (.md) which should not be ignored.# Dependencies
+Thumbs.db
+build/
+coverage/
+dist/
+node_modules/
+npm-debug.log*
+out/
+pids
+yarn-debug.log*
+yarn-error.log*

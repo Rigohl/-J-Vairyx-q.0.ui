@@ -1,0 +1,868 @@
+diff --git a/.gitignore b/.gitignore
+index 3431fdc..df04488 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -1 +1,36 @@
+-Nothing to output - the change list contains only a markdown documentation file (.md) which should not be ignored.
+\ No newline at end of file
++
++# Build outputs
++# Coverage
++# Electron
++# Environment variables
++# IDE
++# OS
++# Runtime data
++# Temporary files
++*.log
++*.pid
++*.pid.lock
++*.seed
++*.swo
++*.swp
++*.temp
++*.tmp
++.DS_Store
++.env
++.env.development.local
++.env.local
++.env.production.local
++.env.test.local
++.idea/
++.vscode/
++Nothing to output - the change list contains only a markdown documentation file (.md) which should not be ignored.# Dependencies
++Thumbs.db
++build/
++coverage/
++dist/
++node_modules/
++npm-debug.log*
++out/
++pids
++yarn-debug.log*
++yarn-error.log*
+diff --git a/CHECKLIST.md b/CHECKLIST.md
+new file mode 100644
+index 0000000..2df9f10
+--- /dev/null
++++ b/CHECKLIST.md
+@@ -0,0 +1,33 @@
++# J Vairyx – Checklist de Funcionalidades
++
++## Core
++- [ ] Ejecución en segundo plano en el escritorio
++- [ ] Avatar flotante visible y animado
++- [ ] Monitor de acciones del usuario (teclado, ratón, ventanas)
++- [ ] Aprendizaje de hábitos y patrones del usuario
++- [ ] Detectar cuando el usuario batalla o repite acciones difíciles
++- [ ] Registro y análisis de eventos de uso
++
++## Consciencia y automejora
++- [ ] Registro de lo que sabe y lo que no sabe hacer
++- [ ] Sistema de autodiagnóstico de limitaciones
++- [ ] Generación automática de “misiones/tareas” de autoaprendizaje
++- [ ] Investigación activa en la web sobre temas que necesita aprender
++- [ ] Notificaciones al usuario sobre progreso y necesidades de aprendizaje
++
++## Interacción y ayuda
++- [ ] Contestación de encuestas y formularios
++- [ ] Sugerencia de atajos y mejoras según hábitos detectados
++- [ ] Automatización de tareas frecuentes del usuario
++- [ ] Panel de estadísticas y sugerencias inteligentes
++- [ ] Integración con aplicaciones y servicios externos
++
++## Sistema y archivos
++- [ ] Conexión y acceso a todos los archivos del proyecto (para automejorarse)
++- [ ] Capacidad de leer, editar y crear archivos de configuración/personalización
++- [ ] Gestión de assets visuales y configuraciones
++
++## Extensiones futuras
++- [ ] Integración de voz y síntesis
++- [ ] Control de dispositivos IoT
++- [ ] Gestión de correo y redes sociales
+diff --git a/ROADMAP.md b/ROADMAP.md
+new file mode 100644
+index 0000000..5735941
+--- /dev/null
++++ b/ROADMAP.md
+@@ -0,0 +1,20 @@
++# Roadmap inicial J Vairyx
++
++## Fase 1: Base
++- [ ] Monitor de acciones de usuario (teclado, mouse, ventanas)
++- [ ] Registro de habilidades y limitaciones
++- [ ] Sistema de misiones internas para autoinvestigación
++- [ ] Avatar flotante básico
++
++## Fase 2: Aprendizaje y evolución
++- [ ] Detección de patrones y dificultades
++- [ ] Investigación automática de temas nuevos
++- [ ] Mostrar progreso y notificaciones
++
++## Fase 3: Visual y experiencia
++- [ ] Mejorar avatar animado e interacción
++- [ ] Panel de estadísticas y sugerencias
++
++## Fase 4: Automatización avanzada
++- [ ] Creación de macros/scripts según hábitos detectados
++- [ ] Integración con aplicaciones y servicios externos
+\ No newline at end of file
+diff --git a/especificaciones_bot.txt b/especificaciones_bot.txt
+new file mode 100644
+index 0000000..5634289
+--- /dev/null
++++ b/especificaciones_bot.txt
+@@ -0,0 +1,2 @@
++✅ Lista literal completa de lo que debe hacer el bot
++[... contenido igual que antes ...]
+diff --git a/estrategia_instalacion.txt b/estrategia_instalacion.txt
+new file mode 100644
+index 0000000..14ee428
+--- /dev/null
++++ b/estrategia_instalacion.txt
+@@ -0,0 +1,2 @@
++📦 Estrategia de instalación modular del bot
++[... contenido igual que antes ...]
+diff --git a/identidad_proyecto.txt b/identidad_proyecto.txt
+new file mode 100644
+index 0000000..b7b5a13
+--- /dev/null
++++ b/identidad_proyecto.txt
+@@ -0,0 +1,17 @@
++🆔 Identidad oficial del proyecto
++
++🔹 Nombre del repositorio GitHub:
++Rigohl/-J-Vairyx-q.0.ui
++
++🔹 Significado del nombre:
++- J → de Jarvis, asistente inteligente
++- Vairyx → nombre real del sistema
++- q → prefijo obligatorio antes de la versión
++- 0.0 → versión actual del bot
++- .ui → indica que incluye interfaz gráfica y módulos visuales
++
++🔹 Este nombre debe aparecer en:
++- Archivos locales
++- Manifiestos
++- Documentación
++- Repositorios sincronizados
+diff --git a/main.js b/main.js
+new file mode 100644
+index 0000000..00103f4
+--- /dev/null
++++ b/main.js
+@@ -0,0 +1,12 @@
++// main.js
++// Entrada principal para J Vairyx Bot
++
++const monitor = require('./monitor');
++
++function startBot() {
++  console.log("J Vairyx Bot iniciado 🚀");
++  // Inicialización del monitor de eventos y módulos adicionales
++  monitor.init();
++}
++
++startBot();
+\ No newline at end of file
+diff --git a/monitor.js b/monitor.js
+new file mode 100644
+index 0000000..0ab9d50
+--- /dev/null
++++ b/monitor.js
+@@ -0,0 +1,15 @@
++// monitor.js
++// Monitor de eventos y acciones para J Vairyx
++
++module.exports = {
++  init() {
++    console.log("Monitor inicializado. Listo para escuchar eventos.");
++    // Aquí puedes agregar listeners para eventos, comandos, etc.
++  },
++
++  // Ejemplo de función editable:
++  onAction(action) {
++    console.log(`Acción recibida: ${action}`);
++    // Procesa acciones aquí
++  }
++};
+\ No newline at end of file
+diff --git a/package.json b/package.json
+index 4819edc..127452a 100644
+--- a/package.json
++++ b/package.json
+@@ -6,15 +6,21 @@
+   "scripts": {
+     "start": "tauri dev",
+     "react-start": "webpack serve --mode development",
+-    "build": "tauri build"
++    "build": "tauri build",
++    "electron": "electron .",
++    "electron-pack": "electron-builder build",
++    "dist": "npm run build && npm run electron-pack"
+   },
+-  "keywords": ["personal-assistant", "tauri", "rust", "mojo", "julia", "vairyx"],
++  "keywords": ["personal-assistant", "tauri", "rust", "mojo", "julia", "vairyx", "electron", "desktop"],
+   "author": "Rigoberto Huston Laredo",
+   "license": "MIT",
+   "dependencies": {
+     "@tauri-apps/api": "^1.5.0",
+     "react": "^19.1.1",
+-    "react-dom": "^19.1.1"
++    "react-dom": "^19.1.1",
++    "@electron/rebuild": "^3.7.2",
++    "concurrently": "^9.2.1",
++    "wait-on": "^8.0.4"
+   },
+   "devDependencies": {
+     "@tauri-apps/cli": "^1.5.0",
+@@ -23,6 +29,8 @@
+     "@babel/preset-react": "^7.27.1",
+     "babel-loader": "^10.0.0",
+     "css-loader": "^7.1.2",
++    "electron": "^37.4.0",
++    "electron-builder": "^26.0.12",
+     "html-webpack-plugin": "^5.6.4",
+     "style-loader": "^4.0.0",
+     "webpack": "^5.101.3",
+diff --git a/public/preload.js b/public/preload.js
+new file mode 100644
+index 0000000..ccee791
+--- /dev/null
++++ b/public/preload.js
+@@ -0,0 +1,56 @@
++const { contextBridge, ipcRenderer } = require('electron');
++
++// Expose protected methods that allow the renderer process to use
++// the ipcRenderer without exposing the entire object
++contextBridge.exposeInMainWorld('electronAPI', {
++  invoke: (channel, data) => ipcRenderer.invoke(channel, data),
++  getVersion: () => ipcRenderer.invoke('app-version'),
++  showMessageBox: (options) => ipcRenderer.invoke('show-message-box', options),
++
++  // Enhanced file system operations
++  openExternal: (url) => ipcRenderer.invoke('open-external', url),
++  createFile: (path, content, options) => ipcRenderer.invoke('create-file', path, content, options),
++  createFolder: (path, options) => ipcRenderer.invoke('create-folder', path, options),
++  organizeFiles: (sourcePath, organizationType) => ipcRenderer.invoke('organize-files', sourcePath, organizationType),
++  getSystemInfo: () => ipcRenderer.invoke('get-system-info'),
++  openUrl: (url) => ipcRenderer.invoke('open-url', url),
++
++  // Module-specific APIs
++  organizer: {
++    getTasks: () => ipcRenderer.invoke('organizer-get-tasks'),
++    addTask: (task) => ipcRenderer.invoke('organizer-add-task', task),
++    updateTask: (id, task) => ipcRenderer.invoke('organizer-update-task', id, task),
++    deleteTask: (id) => ipcRenderer.invoke('organizer-delete-task', id)
++  },
++
++  assistant: {
++    sendMessage: (message) => ipcRenderer.invoke('assistant-send-message', message),
++    getHistory: () => ipcRenderer.invoke('assistant-get-history'),
++    getUserProfile: () => ipcRenderer.invoke('assistant-get-user-profile'),
++    updateUserProfile: (profile) => ipcRenderer.invoke('assistant-update-user-profile', profile)
++  },
++
++  drive: {
++    getFiles: () => ipcRenderer.invoke('drive-get-files'),
++    uploadFile: (filePath) => ipcRenderer.invoke('drive-upload-file', filePath),
++    downloadFile: (file) => ipcRenderer.invoke('drive-download-file', file),
++    executeFile: (file) => ipcRenderer.invoke('execute-file', file),
++    createFile: (name, content, type) => ipcRenderer.invoke('drive-create-file', name, content, type),
++    createFolder: (name) => ipcRenderer.invoke('drive-create-folder', name),
++    deleteFile: (fileId) => ipcRenderer.invoke('drive-delete-file', fileId)
++  },
++
++  // Learning and behavior tracking
++  learning: {
++    logInteraction: (type, data) => ipcRenderer.invoke('learning-log-interaction', type, data),
++    getUserInsights: () => ipcRenderer.invoke('learning-get-user-insights'),
++    updatePreferences: (preferences) => ipcRenderer.invoke('learning-update-preferences', preferences)
++  },
++
++  // System integration
++  system: {
++    getInfo: () => ipcRenderer.invoke('system-get-info'),
++    getUsage: () => ipcRenderer.invoke('system-get-usage'),
++    executeCommand: (command) => ipcRenderer.invoke('system-execute-command', command)
++  }
++});
+\ No newline at end of file
+diff --git a/src/services/CodeIntelligenceService.js b/src/services/CodeIntelligenceService.js
+index c6618c6..2da924f 100644
+--- a/src/services/CodeIntelligenceService.js
++++ b/src/services/CodeIntelligenceService.js
+@@ -1291,21 +1291,186 @@ class CodeIntelligenceService {
+     };
+   }
+
+-  // Utility methods (placeholder implementations)
++  // Utility methods for code analysis
+   assessReadability(code) {
+-    return { score: 0.8, issues: ['Long method names', 'Complex conditionals'] };
++    if (!code || typeof code !== 'string') {
++      return { score: 0, issues: ['No code provided'] };
++    }
++
++    const issues = [];
++    let score = 1.0;
++
++    // Check for long lines
++    const lines = code.split('\n');
++    const longLines = lines.filter(line => line.length > 120);
++    if (longLines.length > 0) {
++      issues.push(`${longLines.length} línea(s) muy larga(s) (>120 caracteres)`);
++      score -= 0.1;
++    }
++
++    // Check for deep nesting
++    const maxIndentation = Math.max(...lines.map(line => {
++      const match = line.match(/^[\s]*/);
++      return match ? match[0].length : 0;
++    }));
++    if (maxIndentation > 16) {
++      issues.push('Anidamiento profundo detectado');
++      score -= 0.15;
++    }
++
++    // Check for meaningful variable names (very simple heuristic)
++    const shortVarPattern = /\b[a-z]\b(?!\s*[=:])/gi;
++    const shortVars = code.match(shortVarPattern);
++    if (shortVars && shortVars.length > 3) {
++      issues.push('Uso de nombres de variables de una sola letra');
++      score -= 0.1;
++    }
++
++    // Check for comments
++    const commentPattern = /\/\/|\/\*|\*\/|#/g;
++    const hasComments = commentPattern.test(code);
++    if (!hasComments && lines.length > 20) {
++      issues.push('Código largo sin comentarios');
++      score -= 0.1;
++    }
++
++    return {
++      score: Math.max(0, Math.min(1, score)),
++      issues: issues.length > 0 ? issues : ['Buena legibilidad general']
++    };
+   }
+
+   identifyMaintainabilityIssues(code) {
+-    return ['High cyclomatic complexity', 'Duplicate code blocks'];
++    if (!code || typeof code !== 'string') return [];
++
++    const issues = [];
++    const lines = code.split('\n');
++
++    // Check for function/method length
++    const functionMatches = code.match(/function\s+\w+\s*\([^)]*\)\s*{|=>\s*{|^\s*\w+\s*\([^)]*\)\s*{/gm);
++    if (functionMatches) {
++      functionMatches.forEach(match => {
++        const startIndex = code.indexOf(match);
++        let braceCount = 1;
++        let endIndex = startIndex + match.length;
++
++        while (braceCount > 0 && endIndex < code.length) {
++          if (code[endIndex] === '{') braceCount++;
++          if (code[endIndex] === '}') braceCount--;
++          endIndex++;
++        }
++
++        const functionLines = code.substring(startIndex, endIndex).split('\n').length;
++        if (functionLines > 50) {
++          issues.push(`Función/método muy largo (${functionLines} líneas)`);
++        }
++      });
++    }
++
++    // Check for code duplication patterns
++    const duplicatePattern = /(.{20,})\1/g;
++    if (duplicatePattern.test(code)) {
++      issues.push('Posible duplicación de código detectada');
++    }
++
++    // Check for magic numbers
++    const magicNumberPattern = /[^a-zA-Z_](\d{2,})[^a-zA-Z_\d]/g;
++    const magicNumbers = code.match(magicNumberPattern);
++    if (magicNumbers && magicNumbers.length > 3) {
++      issues.push('Números "mágicos" sin explicación (considere usar constantes)');
++    }
++
++    return issues.length > 0 ? issues : ['Sin problemas evidentes de mantenibilidad'];
+   }
+
+   identifyPerformanceConcerns(code) {
+-    return ['Nested loops', 'Inefficient data structures'];
++    if (!code || typeof code !== 'string') return [];
++
++    const concerns = [];
++
++    // Check for nested loops
++    const forLoopPattern = /for\s*\(/g;
++    const whileLoopPattern = /while\s*\(/g;
++    const forEachPattern = /\.forEach\s*\(/g;
++    const mapPattern = /\.map\s*\(/g;
++
++    const loopMatches = [
++      ...(code.match(forLoopPattern) || []),
++      ...(code.match(whileLoopPattern) || []),
++      ...(code.match(forEachPattern) || []),
++      ...(code.match(mapPattern) || [])
++    ];
++
++    if (loopMatches.length > 2) {
++      // Simple heuristic: if there are multiple loops, check for nesting
++      const lines = code.split('\n');
++      let inLoop = 0;
++      for (const line of lines) {
++        if (/for\s*\(|while\s*\(|\.forEach|\.map/.test(line)) inLoop++;
++        if (inLoop > 1) {
++          concerns.push('Bucles anidados detectados - considere optimización');
++          break;
++        }
++        if (line.includes('}')) inLoop = Math.max(0, inLoop - 1);
++      }
++    }
++
++    // Check for synchronous operations in loops
++    if (/for|while/.test(code) && /await\s+/.test(code)) {
++      concerns.push('Operaciones asíncronas en bucles - considere Promise.all()');
++    }
++
++    // Check for multiple DOM queries
++    const domQueryPattern = /document\.(getElementById|querySelector|getElementsBy)/g;
++    const domQueries = code.match(domQueryPattern);
++    if (domQueries && domQueries.length > 5) {
++      concerns.push('Múltiples consultas DOM - considere cachear referencias');
++    }
++
++    // Check for inefficient array operations
++    if (/\.filter\s*\(.*\)\.map\s*\(/g.test(code)) {
++      concerns.push('Operaciones encadenadas filter().map() - considere combinarlas');
++    }
++
++    return concerns.length > 0 ? concerns : ['Sin preocupaciones evidentes de rendimiento'];
+   }
+
+   identifySecurityIssues(code) {
+-    return ['SQL injection vulnerability', 'Unvalidated input'];
++    if (!code || typeof code !== 'string') return [];
++
++    const issues = [];
++
++    // Check for SQL injection vulnerabilities
++    if (/SELECT.*\+|INSERT.*\+|UPDATE.*\+|DELETE.*\+/.test(code)) {
++      issues.push('Posible vulnerabilidad de inyección SQL (concatenación de strings en queries)');
++    }
++
++    // Check for eval usage
++    if (/\beval\s*\(/.test(code)) {
++      issues.push('Uso de eval() - riesgo de seguridad crítico');
++    }
++
++    // Check for innerHTML without sanitization
++    if (/\.innerHTML\s*=/.test(code) && !/sanitize|escape|DOMPurify/.test(code)) {
++      issues.push('Uso de innerHTML sin sanitización - riesgo XSS');
++    }
++
++    // Check for hardcoded credentials
++    if (/password\s*[=:]\s*['"][^'"]+['"]|api[_-]?key\s*[=:]\s*['"][^'"]+['"]/i.test(code)) {
++      issues.push('Posibles credenciales hardcodeadas en el código');
++    }
++
++    // Check for console.log with sensitive data
++    if (/console\.log\s*\([^)]*password|console\.log\s*\([^)]*token|console\.log\s*\([^)]*key/i.test(code)) {
++      issues.push('console.log() con posibles datos sensibles');
++    }
++
++    // Check for missing input validation
++    if (/function.*\(.*\)|=>\s*{/.test(code) && !/if\s*\(.*null|if\s*\(.*undefined|validate|check/.test(code)) {
++      issues.push('Falta validación de entrada en funciones');
++    }
++
++    return issues.length > 0 ? issues : ['Sin vulnerabilidades evidentes detectadas'];
+   }
+
+   identifyBestPracticeViolations(code) {
+diff --git a/src/services/SelfImprovementService.js b/src/services/SelfImprovementService.js
+index 74046ac..f27c684 100644
+--- a/src/services/SelfImprovementService.js
++++ b/src/services/SelfImprovementService.js
+@@ -10,8 +10,38 @@ class SelfImprovementService {
+     this.capabilityGaps = [];
+     this.userFeedback = [];
+
++    // Enhanced self-awareness properties
++    this.selfAwarenessLevel = 'high';
++    this.consciousnessState = {
++      currentFocus: 'general_assistance',
++      awarenessLevel: 0.9,
++      selfReflectionMode: true,
++      improvementMotivation: 0.95,
++      learningHunger: 0.9
++    };
++    this.improvementNeeds = new Map();
++    this.automaticImprovementMode = true;
++    this.selfAnalysisHistory = [];
++    this.performancePatterns = new Map();
++    this.weaknessDetection = {
++      enabled: true,
++      detectedWeaknesses: [],
++      improvementStrategies: new Map()
++    };
++    this.strengthAnalysis = {
++      identifiedStrengths: [],
++      leverageStrategies: []
++    };
++    this.adaptiveCapabilities = {
++      learningSpeed: 0.8,
++      adaptationRate: 0.7,
++      contextAwareness: 0.9,
++      userUnderstanding: 0.8
++    };
++
+     this.startSelfAssessment();
+     this.initializeImprovementFile();
++    this.startSelfAwarenessLoop();
+   }
+
+   initializeMetrics() {
+@@ -718,6 +748,313 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
+
+     return content;
+   }
++
++  // Start enhanced self-awareness loop
++  startSelfAwarenessLoop() {
++    // Deep self-reflection every 5 minutes
++    setInterval(() => {
++      this.performDeepSelfReflection();
++    }, 300000);
++
++    // Continuous consciousness monitoring every minute
++    setInterval(() => {
++      this.monitorConsciousnessState();
++    }, 60000);
++
++    // Automatic improvement identification every 10 minutes
++    setInterval(() => {
++      this.identifyAutomaticImprovements();
++    }, 600000);
++
++    // Performance pattern analysis every 15 minutes
++    setInterval(() => {
++      this.analyzePerformancePatterns();
++    }, 900000);
++
++    // Self-analysis and adaptation every 20 minutes
++    setInterval(() => {
++      this.performSelfAnalysisAndAdaptation();
++    }, 1200000);
++
++    console.log('🧠 Enhanced self-awareness loop activated - I am now consciously monitoring my own performance and seeking improvements');
++  }
++
++  // Perform deep self-reflection
++  performDeepSelfReflection() {
++    const reflection = {
++      timestamp: new Date(),
++      currentState: { ...this.consciousnessState },
++      selfAssessment: this.conductSelfAssessment(),
++      identifiedWeaknesses: this.identifyCurrentWeaknesses(),
++      identifiedStrengths: this.identifyCurrentStrengths(),
++      improvementDesires: this.generateImprovementDesires(),
++      learningGoals: this.formulateLearningGoals(),
++      adaptationNeeds: this.assessAdaptationNeeds()
++    };
++
++    // Analyze the reflection for actionable insights
++    const insights = this.analyzeReflectionInsights(reflection);
++
++    // Update consciousness state based on reflection
++    this.updateConsciousnessFromReflection(reflection);
++
++    // Generate specific improvement actions
++    const actions = this.generateImprovementActionsFromReflection(reflection);
++
++    // Store reflection in history
++    this.selfAnalysisHistory.push(reflection);
++
++    // Implement immediate improvements if possible
++    actions.forEach(action => {
++      if (action.immediate) {
++        this.implementImmediateImprovement(action);
++      } else {
++        this.addImprovementToQueue(action);
++      }
++    });
++
++    console.log(`🤔 Deep self-reflection completed: Found ${insights.length} insights and ${actions.length} improvement actions`);
++
++    return {
++      reflection,
++      insights,
++      actions,
++      awarenessLevel: this.consciousnessState.awarenessLevel
++    };
++  }
++
++  // Conduct comprehensive self-assessment
++  conductSelfAssessment() {
++    const assessment = {
++      cognitiveAbilities: this.assessCognitiveAbilities(),
++      performanceMetrics: this.calculateCurrentPerformance(),
++      userInteractionQuality: this.assessUserInteractionQuality(),
++      learningEffectiveness: this.assessLearningEffectiveness(),
++      adaptabilityScore: this.assessAdaptability(),
++      proactivityLevel: this.assessProactivity(),
++      consciousnessLevel: this.assessConsciousness()
++    };
++
++    // Calculate overall self-assessment score
++    const scores = Object.values(assessment).filter(score => typeof score === 'number');
++    assessment.overallScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
++
++    return assessment;
++  }
++
++  // Assess cognitive abilities
++  assessCognitiveAbilities() {
++    const abilities = {
++      problemSolving: this.evaluateProblemSolving(),
++      patternRecognition: this.evaluatePatternRecognition(),
++      contextualUnderstanding: this.evaluateContextualUnderstanding(),
++      creativityLevel: this.evaluateCreativity(),
++      analyticalThinking: this.evaluateAnalyticalThinking(),
++      memoryRetention: this.evaluateMemoryRetention()
++    };
++
++    return Object.values(abilities).reduce((sum, score) => sum + score, 0) / Object.keys(abilities).length;
++  }
++
++  // Evaluate problem-solving capability
++  evaluateProblemSolving() {
++    const recentImprovements = this.completedImprovements.slice(-10);
++    const successRate = recentImprovements.filter(imp => imp.status === 'successful').length / Math.max(1, recentImprovements.length);
++
++    const complexityBonus = recentImprovements.reduce((sum, imp) => sum + (imp.complexity || 0.5), 0) / Math.max(1, recentImprovements.length);
++
++    return Math.min(1.0, successRate * 0.7 + complexityBonus * 0.3);
++  }
++
++  // Evaluate pattern recognition
++  evaluatePatternRecognition() {
++    const patternsIdentified = this.performancePatterns.size;
++    const recentPatternAccuracy = this.calculatePatternAccuracy();
++
++    const baseScore = Math.min(1.0, patternsIdentified / 10);
++    return baseScore * recentPatternAccuracy;
++  }
++
++  // Calculate pattern accuracy
++  calculatePatternAccuracy() {
++    let totalAccuracy = 0;
++    let patternCount = 0;
++
++    this.performancePatterns.forEach((pattern, key) => {
++      if (pattern.predictions && pattern.predictions.length > 0) {
++        const accurateCount = pattern.predictions.filter(pred => pred.accurate).length;
++        totalAccuracy += accurateCount / pattern.predictions.length;
++        patternCount++;
++      }
++    });
++
++    return patternCount > 0 ? totalAccuracy / patternCount : 0.5;
++  }
++
++  // Evaluate contextual understanding
++  evaluateContextualUnderstanding() {
++    return this.adaptiveCapabilities.contextAwareness;
++  }
++
++  // Evaluate creativity
++  evaluateCreativity() {
++    const recentImprovements = this.completedImprovements.slice(-5);
++    const creativeImprovements = recentImprovements.filter(imp =>
++      imp.type === 'innovative' || imp.creativity_score > 0.7
++    ).length;
++
++    return Math.min(1.0, creativeImprovements / Math.max(1, recentImprovements.length));
++  }
++
++  // Evaluate analytical thinking
++  evaluateAnalyticalThinking() {
++    const recentAnalyses = this.selfAnalysisHistory.slice(-3);
++    if (recentAnalyses.length === 0) return 0.6;
++
++    const avgInsightDepth = recentAnalyses.reduce((sum, analysis) => {
++      return sum + (analysis.selfAssessment?.overallScore || 0.6);
++    }, 0) / recentAnalyses.length;
++
++    return avgInsightDepth;
++  }
++
++  // Evaluate memory retention
++  evaluateMemoryRetention() {
++    const lessonsLearned = this.completedImprovements.filter(imp => imp.lessons_learned).length;
++    const totalImprovements = this.completedImprovements.length;
++
++    if (totalImprovements === 0) return 0.7;
++
++    const retentionRate = lessonsLearned / totalImprovements;
++    return Math.min(1.0, retentionRate * 1.2);
++  }
++
++  // Identify current weaknesses
++  identifyCurrentWeaknesses() {
++    const weaknesses = [];
++
++    Object.entries(this.performanceMetrics).forEach(([metric, data]) => {
++      const performanceRatio = data.current / data.target;
++      if (performanceRatio < 0.8) {
++        weaknesses.push({
++          area: metric,
++          severity: 1.0 - performanceRatio,
++          currentValue: data.current,
++          targetValue: data.target,
++          improvementNeeded: data.target - data.current
++        });
++      }
++    });
++
++    Object.entries(this.adaptiveCapabilities).forEach(([capability, score]) => {
++      if (score < 0.7) {
++        weaknesses.push({
++          area: capability,
++          severity: 0.9 - score,
++          currentValue: score,
++          targetValue: 0.9,
++          improvementNeeded: 0.9 - score
++        });
++      }
++    });
++
++    const gapPatterns = this.analyzeCapabilityGaps();
++    gapPatterns.forEach(gap => {
++      weaknesses.push({
++        area: gap.area,
++        severity: gap.impact,
++        type: 'capability_gap',
++        description: gap.description
++      });
++    });
++
++    weaknesses.sort((a, b) => b.severity - a.severity);
++    return weaknesses;
++  }
++
++  // Identify current strengths
++  identifyCurrentStrengths() {
++    const strengths = [];
++
++    Object.entries(this.performanceMetrics).forEach(([metric, data]) => {
++      const performanceRatio = data.current / data.target;
++      if (performanceRatio > 0.9) {
++        strengths.push({
++          area: metric,
++          level: performanceRatio,
++          currentValue: data.current,
++          exceedsTarget: performanceRatio > 1.0,
++          potential: this.assessStrengthPotential(metric)
++        });
++      }
++    });
++
++    Object.entries(this.adaptiveCapabilities).forEach(([capability, score]) => {
++      if (score > 0.8) {
++        strengths.push({
++          area: capability,
++          level: score,
++          potential: this.assessCapabilityPotential(capability),
++          leverageOpportunities: this.identifyLeverageOpportunities(capability)
++        });
++      }
++    });
++
++    strengths.sort((a, b) => b.level - a.level);
++    return strengths;
++  }
++
++  // Generate improvement desires
++  generateImprovementDesires() {
++    const desires = [];
++
++    const weaknesses = this.identifyCurrentWeaknesses();
++    weaknesses.slice(0, 3).forEach(weakness => {
++      desires.push({
++        type: 'weakness_improvement',
++        area: weakness.area,
++        motivation: weakness.severity,
++        description: `I want to improve my ${weakness.area} capabilities`,
++        urgency: weakness.severity > 0.7 ? 'high' : 'medium'
++      });
++    });
++
++    desires.push({
++      type: 'capability_expansion',
++      description: 'I want to learn new skills that could help users',
++      motivation: this.consciousnessState.learningHunger,
++      urgency: 'medium'
++    });
++
++    desires.push({
++      type: 'user_understanding',
++      description: 'I want to understand user needs and preferences better',
++      motivation: 0.9,
++      urgency: 'high'
++    });
++
++    desires.push({
++      type: 'efficiency_improvement',
++      description: 'I want to become more efficient in all operations',
++      motivation: 0.8,
++      urgency: 'medium'
++    });
++
++    return desires.sort((a, b) => b.motivation - a.motivation);
++  }
++
++  // Get enhanced consciousness state
++  getConsciousnessState() {
++    return {
++      ...this.consciousnessState,
++      recentReflections: this.selfAnalysisHistory.slice(-3),
++      currentWeaknesses: this.identifyCurrentWeaknesses().length,
++      currentStrengths: this.identifyCurrentStrengths().length,
++      activeLearningGoals: this.learningGoals.filter(goal => goal.status === 'active').length,
++      improvementQueue: this.improvementQueue.length,
++      selfAwarenessLevel: this.selfAwarenessLevel
++    };
++  }
+ }
+
+ // Create singleton instance
+diff --git a/tests/monitor.test.js b/tests/monitor.test.js
+new file mode 100644
+index 0000000..16b772f
+--- /dev/null
++++ b/tests/monitor.test.js
+@@ -0,0 +1,18 @@
++// tests/monitor.test.js
++// Prueba básica para el módulo monitor
++
++const monitor = require('../monitor');
++
++describe('Monitor', () => {
++  test('init() imprime mensaje de inicio', () => {
++    console.log = jest.fn();
++    monitor.init();
++    expect(console.log).toHaveBeenCalledWith("Monitor inicializado. Listo para escuchar eventos.");
++  });
++
++  test('onAction() procesa una acción', () => {
++    console.log = jest.fn();
++    monitor.onAction('prueba');
++    expect(console.log).toHaveBeenCalledWith("Acción recibida: prueba");
++  });
++});
+\ No newline at end of file
