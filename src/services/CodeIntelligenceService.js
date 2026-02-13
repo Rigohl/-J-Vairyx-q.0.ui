@@ -1291,21 +1291,186 @@ class CodeIntelligenceService {
     };
   }
 
-  // Utility methods (placeholder implementations)
+  // Utility methods for code analysis
   assessReadability(code) {
-    return { score: 0.8, issues: ['Long method names', 'Complex conditionals'] };
+    if (!code || typeof code !== 'string') {
+      return { score: 0, issues: ['No code provided'] };
+    }
+
+    const issues = [];
+    let score = 1.0;
+
+    // Check for long lines
+    const lines = code.split('\n');
+    const longLines = lines.filter(line => line.length > 120);
+    if (longLines.length > 0) {
+      issues.push(`${longLines.length} línea(s) muy larga(s) (>120 caracteres)`);
+      score -= 0.1;
+    }
+
+    // Check for deep nesting
+    const maxIndentation = Math.max(...lines.map(line => {
+      const match = line.match(/^[\s]*/);
+      return match ? match[0].length : 0;
+    }));
+    if (maxIndentation > 16) {
+      issues.push('Anidamiento profundo detectado');
+      score -= 0.15;
+    }
+
+    // Check for meaningful variable names (very simple heuristic)
+    const shortVarPattern = /\b[a-z]\b(?!\s*[=:])/gi;
+    const shortVars = code.match(shortVarPattern);
+    if (shortVars && shortVars.length > 3) {
+      issues.push('Uso de nombres de variables de una sola letra');
+      score -= 0.1;
+    }
+
+    // Check for comments
+    const commentPattern = /\/\/|\/\*|\*\/|#/g;
+    const hasComments = commentPattern.test(code);
+    if (!hasComments && lines.length > 20) {
+      issues.push('Código largo sin comentarios');
+      score -= 0.1;
+    }
+
+    return {
+      score: Math.max(0, Math.min(1, score)),
+      issues: issues.length > 0 ? issues : ['Buena legibilidad general']
+    };
   }
 
   identifyMaintainabilityIssues(code) {
-    return ['High cyclomatic complexity', 'Duplicate code blocks'];
+    if (!code || typeof code !== 'string') return [];
+
+    const issues = [];
+    const lines = code.split('\n');
+
+    // Check for function/method length
+    const functionMatches = code.match(/function\s+\w+\s*\([^)]*\)\s*{|=>\s*{|^\s*\w+\s*\([^)]*\)\s*{/gm);
+    if (functionMatches) {
+      functionMatches.forEach(match => {
+        const startIndex = code.indexOf(match);
+        let braceCount = 1;
+        let endIndex = startIndex + match.length;
+
+        while (braceCount > 0 && endIndex < code.length) {
+          if (code[endIndex] === '{') braceCount++;
+          if (code[endIndex] === '}') braceCount--;
+          endIndex++;
+        }
+
+        const functionLines = code.substring(startIndex, endIndex).split('\n').length;
+        if (functionLines > 50) {
+          issues.push(`Función/método muy largo (${functionLines} líneas)`);
+        }
+      });
+    }
+
+    // Check for code duplication patterns
+    const duplicatePattern = /(.{20,})\1/g;
+    if (duplicatePattern.test(code)) {
+      issues.push('Posible duplicación de código detectada');
+    }
+
+    // Check for magic numbers
+    const magicNumberPattern = /[^a-zA-Z_](\d{2,})[^a-zA-Z_\d]/g;
+    const magicNumbers = code.match(magicNumberPattern);
+    if (magicNumbers && magicNumbers.length > 3) {
+      issues.push('Números "mágicos" sin explicación (considere usar constantes)');
+    }
+
+    return issues.length > 0 ? issues : ['Sin problemas evidentes de mantenibilidad'];
   }
 
   identifyPerformanceConcerns(code) {
-    return ['Nested loops', 'Inefficient data structures'];
+    if (!code || typeof code !== 'string') return [];
+
+    const concerns = [];
+
+    // Check for nested loops
+    const forLoopPattern = /for\s*\(/g;
+    const whileLoopPattern = /while\s*\(/g;
+    const forEachPattern = /\.forEach\s*\(/g;
+    const mapPattern = /\.map\s*\(/g;
+
+    const loopMatches = [
+      ...(code.match(forLoopPattern) || []),
+      ...(code.match(whileLoopPattern) || []),
+      ...(code.match(forEachPattern) || []),
+      ...(code.match(mapPattern) || [])
+    ];
+
+    if (loopMatches.length > 2) {
+      // Simple heuristic: if there are multiple loops, check for nesting
+      const lines = code.split('\n');
+      let inLoop = 0;
+      for (const line of lines) {
+        if (/for\s*\(|while\s*\(|\.forEach|\.map/.test(line)) inLoop++;
+        if (inLoop > 1) {
+          concerns.push('Bucles anidados detectados - considere optimización');
+          break;
+        }
+        if (line.includes('}')) inLoop = Math.max(0, inLoop - 1);
+      }
+    }
+
+    // Check for synchronous operations in loops
+    if (/for|while/.test(code) && /await\s+/.test(code)) {
+      concerns.push('Operaciones asíncronas en bucles - considere Promise.all()');
+    }
+
+    // Check for multiple DOM queries
+    const domQueryPattern = /document\.(getElementById|querySelector|getElementsBy)/g;
+    const domQueries = code.match(domQueryPattern);
+    if (domQueries && domQueries.length > 5) {
+      concerns.push('Múltiples consultas DOM - considere cachear referencias');
+    }
+
+    // Check for inefficient array operations
+    if (/\.filter\s*\(.*\)\.map\s*\(/g.test(code)) {
+      concerns.push('Operaciones encadenadas filter().map() - considere combinarlas');
+    }
+
+    return concerns.length > 0 ? concerns : ['Sin preocupaciones evidentes de rendimiento'];
   }
 
   identifySecurityIssues(code) {
-    return ['SQL injection vulnerability', 'Unvalidated input'];
+    if (!code || typeof code !== 'string') return [];
+
+    const issues = [];
+
+    // Check for SQL injection vulnerabilities
+    if (/SELECT.*\+|INSERT.*\+|UPDATE.*\+|DELETE.*\+/.test(code)) {
+      issues.push('Posible vulnerabilidad de inyección SQL (concatenación de strings en queries)');
+    }
+
+    // Check for eval usage
+    if (/\beval\s*\(/.test(code)) {
+      issues.push('Uso de eval() - riesgo de seguridad crítico');
+    }
+
+    // Check for innerHTML without sanitization
+    if (/\.innerHTML\s*=/.test(code) && !/sanitize|escape|DOMPurify/.test(code)) {
+      issues.push('Uso de innerHTML sin sanitización - riesgo XSS');
+    }
+
+    // Check for hardcoded credentials
+    if (/password\s*[=:]\s*['"][^'"]+['"]|api[_-]?key\s*[=:]\s*['"][^'"]+['"]/i.test(code)) {
+      issues.push('Posibles credenciales hardcodeadas en el código');
+    }
+
+    // Check for console.log with sensitive data
+    if (/console\.log\s*\([^)]*password|console\.log\s*\([^)]*token|console\.log\s*\([^)]*key/i.test(code)) {
+      issues.push('console.log() con posibles datos sensibles');
+    }
+
+    // Check for missing input validation
+    if (/function.*\(.*\)|=>\s*{/.test(code) && !/if\s*\(.*null|if\s*\(.*undefined|validate|check/.test(code)) {
+      issues.push('Falta validación de entrada en funciones');
+    }
+
+    return issues.length > 0 ? issues : ['Sin vulnerabilidades evidentes detectadas'];
   }
 
   identifyBestPracticeViolations(code) {
