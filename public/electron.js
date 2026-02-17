@@ -1,5 +1,7 @@
 const { app, BrowserWindow, ipcMain, Menu, shell, Tray, nativeImage } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const fsPromises = fs.promises;
 const isDev = process.env.NODE_ENV === 'development';
 
 // Keep a global reference of the window object
@@ -276,8 +278,39 @@ ipcMain.handle('show-message-box', async (event, options) => {
 });
 
 // Data storage using Electron's userData
-const fs = require('fs');
 const dataPath = path.join(app.getPath('userData'), 'j-vairyx-data.json');
+const SAFE_BASE_DIR = path.join(app.getPath('userData'), 'storage');
+
+// Ensure safe storage directory exists
+if (!fs.existsSync(SAFE_BASE_DIR)) {
+  try {
+    fs.mkdirSync(SAFE_BASE_DIR, { recursive: true });
+  } catch (error) {
+    console.error('Error creating safe storage directory:', error);
+  }
+}
+
+/**
+ * Validates and resolves a path against the safe base directory.
+ * Prevents directory traversal and restricts access to SAFE_BASE_DIR.
+ */
+const validatePath = (userInputPath) => {
+  if (!userInputPath) {
+    throw new Error('Path is required');
+  }
+
+  // Resolve the path to an absolute path
+  const resolvedPath = path.resolve(SAFE_BASE_DIR, userInputPath);
+
+  // Use path.relative to ensure it's inside SAFE_BASE_DIR
+  const relative = path.relative(SAFE_BASE_DIR, resolvedPath);
+
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error('Access denied: Path is outside of allowed storage area');
+  }
+
+  return resolvedPath;
+};
 
 const loadData = () => {
   try {
@@ -373,8 +406,6 @@ ipcMain.handle('drive-upload-file', async (event, filePath) => {
 ipcMain.handle('drive-download-file', async (event, file) => {
   try {
     const { dialog } = require('electron');
-    const fs = require('fs').promises;
-    const path = require('path');
     
     // Show save dialog
     const { filePath, canceled } = await dialog.showSaveDialog(mainWindow, {
@@ -393,7 +424,7 @@ ipcMain.handle('drive-download-file', async (event, file) => {
     let content = generateFileContent(file);
     
     // Write file
-    await fs.writeFile(filePath, content, 'utf8');
+    await fsPromises.writeFile(filePath, content, 'utf8');
     
     return {
       success: true,
@@ -411,21 +442,20 @@ ipcMain.handle('drive-download-file', async (event, file) => {
 // Add file execution handler
 ipcMain.handle('execute-file', async (event, file) => {
   try {
-    const { shell } = require('electron');
-    const fs = require('fs').promises;
-    const path = require('path');
     const os = require('os');
     
     // Create temporary file with appropriate content
     const tempDir = os.tmpdir();
-    const tempFilePath = path.join(tempDir, file.name);
+    // Sanitize file name to prevent traversal in temp directory
+    const safeFileName = path.basename(file.name);
+    const tempFilePath = path.join(tempDir, safeFileName);
     const content = generateFileContent(file);
     
-    await fs.writeFile(tempFilePath, content, 'utf8');
+    await fsPromises.writeFile(tempFilePath, content, 'utf8');
     
     // Execute based on file type
     let result;
-    const extension = path.extname(file.name).toLowerCase();
+    const extension = path.extname(safeFileName).toLowerCase();
     
     if (['.exe', '.msi', '.bat', '.cmd'].includes(extension)) {
       // For executable files, ask for confirmation first
@@ -435,24 +465,24 @@ ipcMain.handle('execute-file', async (event, file) => {
         buttons: ['Ejecutar', 'Cancelar'],
         defaultId: 0,
         title: 'Confirmar ejecución',
-        message: `¿Deseas ejecutar el archivo ${file.name}?`,
+        message: `¿Deseas ejecutar el archivo ${safeFileName}?`,
         detail: 'Solo ejecuta archivos de fuentes confiables.'
       });
       
       if (response.response === 0) {
         await shell.openPath(tempFilePath);
-        result = { success: true, message: `Ejecutando ${file.name}...` };
+        result = { success: true, message: `Ejecutando ${safeFileName}...` };
       } else {
         result = { success: false, message: 'Ejecución cancelada por el usuario' };
       }
     } else if (['.js', '.py', '.html', '.txt', '.md', '.json', '.css'].includes(extension)) {
       // For text/code files, open with default application
       await shell.openPath(tempFilePath);
-      result = { success: true, message: `Abriendo ${file.name} con la aplicación predeterminada` };
+      result = { success: true, message: `Abriendo ${safeFileName} con la aplicación predeterminada` };
     } else {
       // For other files, just open them
       await shell.openPath(tempFilePath);
-      result = { success: true, message: `Abriendo ${file.name}` };
+      result = { success: true, message: `Abriendo ${safeFileName}` };
     }
     
     return result;
@@ -685,12 +715,12 @@ Generado por J-Vairyx Personal Assistant 🤖`;
 // Enhanced file system IPC handlers
 ipcMain.handle('create-file', async (event, filePath, content = '', options = {}) => {
   try {
-    const fs = require('fs').promises;
-    await fs.writeFile(filePath, content, 'utf8');
+    const validatedPath = validatePath(filePath);
+    await fsPromises.writeFile(validatedPath, content, 'utf8');
     return { 
       success: true, 
-      path: filePath, 
-      message: `Archivo '${path.basename(filePath)}' creado exitosamente` 
+      path: path.basename(validatedPath),
+      message: `Archivo '${path.basename(validatedPath)}' creado exitosamente`
     };
   } catch (error) {
     return { 
@@ -702,12 +732,12 @@ ipcMain.handle('create-file', async (event, filePath, content = '', options = {}
 
 ipcMain.handle('create-folder', async (event, folderPath, options = {}) => {
   try {
-    const fs = require('fs').promises;
-    await fs.mkdir(folderPath, { recursive: true });
+    const validatedPath = validatePath(folderPath);
+    await fsPromises.mkdir(validatedPath, { recursive: true });
     return { 
       success: true, 
-      path: folderPath, 
-      message: `Carpeta '${path.basename(folderPath)}' creada exitosamente` 
+      path: path.basename(validatedPath),
+      message: `Carpeta '${path.basename(validatedPath)}' creada exitosamente`
     };
   } catch (error) {
     return { 
