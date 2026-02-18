@@ -1100,6 +1100,109 @@ class BusinessIntelligenceService {
       `¿Qué métricas indicarían éxito temprano en ${topic}?`
     ];
   }
+
+  // --- Missing Methods Implementation ---
+
+  analyzeCompetition(description, context) {
+    const competitors = [];
+    const lowerDesc = description ? description.toLowerCase() : '';
+
+    if (this.businessModels) {
+      Object.values(this.businessModels).forEach(model => {
+        if (model.examples) {
+          model.examples.forEach(ex => {
+            if (lowerDesc.includes(ex.toLowerCase())) {
+              competitors.push(ex);
+            }
+          });
+        }
+      });
+    }
+
+    return {
+      direct_competitors: competitors.length > 0 ? competitors : ['Competidores no identificados específicamente'],
+      competitive_dynamics: this.marketDynamics.competitive_dynamics.porters_five_forces,
+      market_positioning: 'Análisis de posicionamiento pendiente de datos específicos'
+    };
+  }
+
+  suggestBusinessModels(description, context) {
+    const lowerDesc = description ? description.toLowerCase() : '';
+    const suggestions = [];
+
+    if (this.businessModels) {
+        if (lowerDesc.includes('software') || lowerDesc.includes('platform') || lowerDesc.includes('cloud')) {
+          suggestions.push(this.businessModels.saas);
+        }
+        if (lowerDesc.includes('vender') || lowerDesc.includes('buy') || lowerDesc.includes('sell') || lowerDesc.includes('marketplace')) {
+          suggestions.push(this.businessModels.marketplace);
+        }
+        if (lowerDesc.includes('free') || lowerDesc.includes('gratis')) {
+          suggestions.push(this.businessModels.freemium);
+        }
+        if (lowerDesc.includes('subscribe') || lowerDesc.includes('suscripción') || lowerDesc.includes('mensual')) {
+          suggestions.push(this.businessModels.subscription_economy);
+        }
+    }
+
+    return suggestions.length > 0 ? suggestions : (this.businessModels ? [this.businessModels.saas] : []);
+  }
+
+  identifySuccessFactors(description, context) {
+    const models = this.suggestBusinessModels(description, context);
+    const factors = [
+        'Equipo fuerte',
+        'Market timing',
+        'Ejecución eficiente'
+    ];
+
+    models.forEach(m => {
+        if(m && m.success_factors) factors.push(...m.success_factors);
+    });
+
+    return factors;
+  }
+
+  identifyRisks(description, context) {
+     const models = this.suggestBusinessModels(description, context);
+     const risks = [];
+
+     models.forEach(m => {
+         if(m && m.challenges) risks.push(...m.challenges);
+     });
+
+     if (risks.length === 0) {
+         risks.push('Riesgo de adopción de mercado');
+         risks.push('Riesgo de financiamiento');
+     }
+
+     return risks;
+  }
+
+  generateRecommendations(description, context) {
+      return [
+          'Validar la hipótesis principal con 10 clientes potenciales',
+          'Construir un prototipo de baja fidelidad',
+          'Analizar la estructura de costos unitarios'
+      ];
+  }
+
+  // Alias methods for generateBusinessInsight
+  identifyMarketOpportunity(topic) {
+      return this.assessMarket(topic);
+  }
+
+  analyzeCompetitiveSpace(topic) {
+      return this.analyzeCompetition(topic);
+  }
+
+  suggestBusinessModel(topic) {
+      return this.suggestBusinessModels(topic);
+  }
+
+  defineSuccessMetrics(topic) {
+      return this.identifySuccessFactors(topic);
+  }
 }
 
 // Create and export singleton instance
