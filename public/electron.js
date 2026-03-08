@@ -457,7 +457,7 @@ ipcMain.handle('execute-file', async (event, file) => {
     let result;
     const extension = path.extname(safeFileName).toLowerCase();
     
-    if (['.exe', '.msi', '.bat', '.cmd'].includes(extension)) {
+    if (['.exe', '.msi', '.bat', '.cmd', '.js', '.py', '.sh', '.vbs', '.ps1', '.pl', '.php', '.rb'].includes(extension)) {
       // For executable files, ask for confirmation first
       const { dialog } = require('electron');
       const response = await dialog.showMessageBox(mainWindow, {
@@ -475,7 +475,7 @@ ipcMain.handle('execute-file', async (event, file) => {
       } else {
         result = { success: false, message: 'Ejecución cancelada por el usuario' };
       }
-    } else if (['.js', '.py', '.html', '.txt', '.md', '.json', '.css'].includes(extension)) {
+    } else if (['.html', '.txt', '.md', '.json', '.css'].includes(extension)) {
       // For text/code files, open with default application
       await shell.openPath(tempFilePath);
       result = { success: true, message: `Abriendo ${safeFileName} con la aplicación predeterminada` };
@@ -494,10 +494,20 @@ ipcMain.handle('execute-file', async (event, file) => {
   }
 });
 
+
+// Helper to sanitize filenames for content injection
+function sanitizeForContent(str) {
+  if (!str) return 'unknown';
+  // Allow alphanumeric, dot, dash, underscore. Replace everything else with underscore.
+  return str.replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
 // Helper function to generate file content
 function generateFileContent(file) {
-  const extension = require('path').extname(file.name).toLowerCase();
-  const baseName = require('path').basename(file.name, extension);
+  const path = require('path');
+  const extension = path.extname(file.name).toLowerCase();
+  const safeNameForContent = sanitizeForContent(path.basename(file.name));
+  const baseName = path.basename(safeNameForContent, extension);
   
   switch (extension) {
     case '.html':
@@ -528,7 +538,7 @@ function generateFileContent(file) {
 <body>
     <div class="container">
         <h1>🚀 Archivo generado por J-Vairyx</h1>
-        <h2>Archivo: ${file.name}</h2>
+        <h2>Archivo: ${safeNameForContent}</h2>
         <p>Este archivo fue creado automáticamente por tu asistente personal J-Vairyx.</p>
         <p>Fecha de creación: ${new Date().toLocaleDateString('es-ES')}</p>
         <p>¡Tu asistente inteligente está funcionando perfectamente! 🤖</p>
@@ -542,7 +552,7 @@ function generateFileContent(file) {
 
 console.log('🚀 ¡Hola desde J-Vairyx!');
 console.log('Este archivo fue generado automáticamente por tu asistente personal');
-console.log('Archivo: ${file.name}');
+console.log('Archivo: ${safeNameForContent}');
 console.log('Fecha: ${new Date().toLocaleString('es-ES')}');
 
 // Función de ejemplo
@@ -570,7 +580,7 @@ import sys
 def main():
     print("🚀 ¡Hola desde J-Vairyx!")
     print("Este archivo fue generado automáticamente por tu asistente personal")
-    print(f"Archivo: ${file.name}")
+    print(f"Archivo: ${safeNameForContent}")
     print(f"Fecha: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("¡Tu asistente inteligente está funcionando perfectamente! 🤖")
     
@@ -585,7 +595,7 @@ if __name__ == "__main__":
       return `@echo off
 echo 🚀 Hola desde J-Vairyx Personal Assistant!
 echo Este archivo fue generado automaticamente por tu asistente personal
-echo Archivo: ${file.name}
+echo Archivo: ${safeNameForContent}
 echo Fecha: %date% %time%
 echo.
 echo ¡Tu asistente inteligente esta funcionando perfectamente! 🤖
@@ -612,7 +622,7 @@ pause > nul`;
       return `# 🚀 Archivo generado por J-Vairyx
 
 ## Información del archivo
-- **Nombre:** ${file.name}
+- **Nombre:** ${safeNameForContent}
 - **Generado por:** J-Vairyx Personal Assistant
 - **Fecha:** ${new Date().toLocaleString('es-ES')}
 
@@ -692,7 +702,7 @@ body {
 ==============================================
 
 Información del archivo:
-- Nombre: ${file.name}
+- Nombre: ${safeNameForContent}
 - Tipo: ${file.type || 'desconocido'}
 - Generado: ${new Date().toLocaleString('es-ES')}
 
