@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import AssistantModule from './modules/AssistantModule';
 import OrganizerModule from './modules/OrganizerModule';
 import DriveModule from './modules/DriveModule';
