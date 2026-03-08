@@ -234,18 +234,24 @@ function showTrayNotification(message) {
 
 // Background intelligence services
 function initializeBackgroundServices() {
-  console.log('🚀 Inicializando servicios de inteligencia en segundo plano...');
+  if (isDev) {
+    console.log('🚀 Inicializando servicios de inteligencia en segundo plano...');
+  }
   
   // Start autonomous learning and improvement cycles
   setInterval(() => {
     // Simulate autonomous learning processes
-    console.log('🧠 Proceso de aprendizaje autónomo ejecutándose...');
+    if (isDev) {
+      console.log('🧠 Proceso de aprendizaje autónomo ejecutándose...');
+    }
   }, 300000); // Every 5 minutes
   
   // Start intelligent monitoring
   setInterval(() => {
     // Simulate system monitoring and optimization
-    console.log('⚡ Monitoreo inteligente del sistema...');
+    if (isDev) {
+      console.log('⚡ Monitoreo inteligente del sistema...');
+    }
   }, 600000); // Every 10 minutes
   
   // Start proactive assistance checks
