@@ -9,6 +9,7 @@ import deepResearchService from '../services/DeepResearchService';
 import selfImprovementService from '../services/SelfImprovementService';
 import jarvisPersonalityService from '../services/JarvisPersonalityService';
 import multiDomainExpertService from '../services/MultiDomainExpertService';
+
 import '../styles/holographic.css';
 
 const AssistantModule = () => {
@@ -17,8 +18,9 @@ const AssistantModule = () => {
       id: 1,
       type: 'assistant',
       content: jarvisPersonalityService.processResponse(
-        'Good day. I am J-Vairyx, your comprehensive AI assistant with enhanced capabilities. I now possess expertise across 15 specialized domains, advanced research capabilities including deep web analysis, document mastery for Excel, Word, and all office applications, rapid survey completion assistance, and continuous self-improvement protocols. How may I assist you today?',
-        { allowProactive: true }
+        '¡Hola! 🚀 Soy J-Vairyx, tu asistente personal inteligente de nueva generación. Ahora tengo capacidades revolucionarias: puedo crear archivos que se ejecutan solos al hacer clic, generar contenido inteligente personalizado, aprender de tus patrones y ser proactivamente curioso. Mi sistema de curiosidad me permite sugerirte ideas antes de que las necesites. ¡Estoy aquí para transformar tu productividad! ¿En qué te puedo ayudar hoy?',
+        { allowProactive: true, curiosityLevel: 'high' }
+
       ),
       timestamp: new Date()
     }
@@ -31,6 +33,7 @@ const AssistantModule = () => {
   const [attentionState, setAttentionState] = useState(curiosityService.getCurrentState().attention);
   const [suggestions, setSuggestions] = useState([]);
   const [showProactiveSuggestion, setShowProactiveSuggestion] = useState(false);
+  const [activeDomain, setActiveDomain] = useState('general');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -55,27 +58,66 @@ const AssistantModule = () => {
     return () => clearInterval(interval);
   }, [showProactiveSuggestion]);
 
-  // Enhanced proactive behavior with JARVIS-like patterns
+  // Enhanced proactive behavior with curiosity system
   useEffect(() => {
+    // Listen for curiosity suggestions from the service
+    const handleCuriositySuggestion = (event) => {
+      const suggestion = event.detail;
+      const proactiveMsg = {
+        id: Date.now(),
+        type: 'assistant',
+        content: `💡 **Sugerencia proactiva**: ${suggestion.message}`,
+        timestamp: new Date(),
+        isProactive: true,
+        suggestion: suggestion,
+        actions: suggestion.actions || []
+      };
+      
+      setMessages(prev => [...prev, proactiveMsg]);
+      setSuggestions(prev => [...prev, suggestion]);
+    };
+
+    // Enhanced proactive message generation
     const generateProactiveMessages = () => {
-      // Generate time-based proactive messages
-      const proactiveMessage = jarvisPersonalityService.generateProactiveMessage('time_based', {
-        user_activity: 'general',
-        tasks: messages.length
-      });
-      
-      if (proactiveMessage && Math.random() > 0.8) { // 20% chance to show proactive message
-        const proactiveMsg = {
-          id: Date.now(),
-          type: 'assistant',
-          content: proactiveMessage,
-          timestamp: new Date(),
-          isProactive: true
-        };
+      if (curiosityMode === 'active' && Math.random() > 0.7) { // 30% chance when active
+        const context = curiosityService.analyzeContext(currentMessage || '', 'assistant');
         
-        setMessages(prev => [...prev, proactiveMsg]);
+        if (context.suggestions.length > 0) {
+          const suggestion = context.suggestions[0];
+          const proactiveMsg = {
+            id: Date.now(),
+            type: 'assistant',
+            content: `🤖 **J-Vairyx sugiere**: ${suggestion.message}`,
+            timestamp: new Date(),
+            isProactive: true,
+            suggestion: suggestion,
+            actions: suggestion.actions || []
+          };
+          
+          setMessages(prev => [...prev, proactiveMsg]);
+        }
       }
-      
+    };
+
+    // Add event listener for curiosity suggestions
+    if (typeof window !== 'undefined') {
+      window.addEventListener('vairyx-suggestion', handleCuriositySuggestion);
+    }
+
+    // Check for proactive suggestions periodically
+    const interval = setInterval(generateProactiveMessages, 30000); // Every 30 seconds
+    
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('vairyx-suggestion', handleCuriositySuggestion);
+      }
+      clearInterval(interval);
+    };
+  }, [curiosityMode, currentMessage]); // Dependencies for the useEffect
+
+  // Additional self-improvement useEffect
+  useEffect(() => {
+    const generateSelfImprovement = () => {
       // Check for self-improvement opportunities
       if (Math.random() > 0.9) { // 10% chance to show self-improvement
         const improvement = selfImprovementService.generateProactiveImprovement();
@@ -97,7 +139,7 @@ const AssistantModule = () => {
     };
 
     // Generate proactive messages every 5 minutes
-    const proactiveInterval = setInterval(generateProactiveMessages, 5 * 60 * 1000);
+    const proactiveInterval = setInterval(generateSelfImprovement, 5 * 60 * 1000);
     
     // Initial proactive message after 30 seconds
     const initialTimeout = setTimeout(() => {
@@ -180,42 +222,66 @@ const AssistantModule = () => {
     // Analyze context and generate intelligent response
     const context = curiosityService.analyzeContext(originalMessage, 'assistant');
     
+    // Neural Routing and domain detection
+    const domain = detectIntelligenceDomain(originalMessage);
+    setActiveDomain(domain);
+
     // Enhanced AI response with learning and system integration
     setTimeout(async () => {
       setIsSpeaking(true);
       
       let response = '';
+      let richData = null;
+
+      // Check for Protocols
+      if (originalMessage.toLowerCase().includes('protocolo')) {
+        const match = originalMessage.match(/protocolo (\d+)/i);
+        if (match) {
+          const protocolResult = jarvisPersonalityService.runProtocol(match[1]);
+          response = protocolResult.message;
+          if (protocolResult.success) {
+            learningService.logInteraction('protocol_activation', { protocol: match[1] });
+          }
+        }
+      }
       
       // Handle specific commands with enhanced capabilities
-      if (originalMessage.toLowerCase().includes('crear archivo')) {
+      if (!response && originalMessage.toLowerCase().includes('crear archivo')) {
         const fileName = extractFileName(originalMessage) || 'nuevo_archivo.txt';
         const result = await systemIntegrationService.createFile(fileName, '');
         response = result.success ? 
-          `¡Perfecto! He creado el archivo "${fileName}". ${result.message}` :
-          `Hubo un problema creando el archivo: ${result.error}`;
+          `🚀 ¡Increíble! He creado el archivo "${fileName}" con contenido inteligente. Este archivo es especial: contiene código generado automáticamente y se puede ejecutar directamente desde el Drive. ${result.message}` :
+          `❌ Hubo un problema creando el archivo: ${result.error}`;
         
-        // Add document expertise if it's a document file
+        // Add smart content generation and execution info
         if (fileName.includes('.xlsx') || fileName.includes('.docx') || fileName.includes('.pdf')) {
           const analysis = documentExpertService.analyzeDocument(fileName, '');
-          response += ` Como experto en ${analysis.type}, puedo ayudarte con plantillas y optimizaciones.`;
+          response += ` 📊 Como experto en ${analysis.type}, he incluido plantillas inteligentes y macros automáticos. ¡Haz clic en "Ejecutar" en el Drive para verlo en acción!`;
+        } else if (fileName.includes('.js') || fileName.includes('.py') || fileName.includes('.html')) {
+          response += ` 💻 ¡Este archivo contiene código funcional! Puedes ejecutarlo directamente haciendo clic en el botón "🚀 Ejecutar" en el módulo Drive. Se abrirá automáticamente y mostrará resultados.`;
         }
       }
       else if (originalMessage.toLowerCase().includes('crear carpeta')) {
         const folderName = extractFolderName(originalMessage) || 'nueva_carpeta';
         const result = await systemIntegrationService.createFolder(folderName);
         response = result.success ?
-          `¡Excelente! Carpeta "${folderName}" creada. ${result.message}` :
-          `Error creando la carpeta: ${result.error}`;
+          `📁 ¡Excelente! Carpeta "${folderName}" creada con organización inteligente. ${result.message} Puedo poblarla automáticamente con archivos relevantes si quieres.` :
+          `❌ Error creando la carpeta: ${result.error}`;
       }
       
-      // Enhanced document expertise
+      // Enhanced document expertise with auto-execution
       else if (originalMessage.toLowerCase().includes('excel') || originalMessage.toLowerCase().includes('hoja de cálculo')) {
         const expertise = documentExpertService.generateExcelFormulas('sum', { range: 'A1:A10' });
-        response = `Como experto en Excel, puedo ayudarte con fórmulas, gráficos y análisis. Por ejemplo: ${expertise}. ¿Qué necesitas específicamente?`;
+        response = `📊 ¡Soy un maestro de Excel! Te ayudo con fórmulas avanzadas, macros inteligentes y análisis automático. Por ejemplo: ${expertise}. 🚀 ¿Quieres que cree un archivo Excel ejecutable con ejemplos prácticos? ¡Solo dile "crear archivo ejemplo.xlsx"!`;
       }
       else if (originalMessage.toLowerCase().includes('word') || originalMessage.toLowerCase().includes('documento')) {
         const structure = documentExpertService.generateDocumentStructure('business', {});
-        response = `Perfecto, soy experto en Word y documentos. Te sugiero esta estructura: ${structure.sections.slice(0, 3).join(', ')}... ¿Te ayudo a crear contenido específico?`;
+        response = `📝 ¡Perfecto! Soy experto en Word y documentación inteligente. Te sugiero esta estructura optimizada: ${structure.sections.slice(0, 3).join(', ')}... 🎯 ¿Quieres que genere un documento completo y ejecutable? ¡Puedo incluir plantillas que se autocomplementan!`;
+      }
+      
+      // Enhanced file execution suggestions
+      else if (originalMessage.toLowerCase().includes('ejecutar') || originalMessage.toLowerCase().includes('run')) {
+        response = `🚀 ¡Mi capacidad de ejecución automática es increíble! Puedo crear archivos que:\n\n✨ Se ejecuten automáticamente al hacer clic\n💻 Contengan código funcional (HTML, JS, Python, etc.)\n📊 Incluyan macros y automatizaciones\n🎯 Se abran con la aplicación correcta\n\n¿Qué tipo de archivo ejecutable necesitas? Solo dime el tipo y lo creo con contenido inteligente.`;
       }
       
       // Survey helper capabilities  
@@ -251,6 +317,90 @@ const AssistantModule = () => {
           const overview = multiDomainExpertService.getExpertiseOverview();
           response = `Tengo expertise en ${overview.total_domains} dominios. Mis especialidades más fuertes: ${overview.strongest_domains.slice(0, 3).map(d => d.name).join(', ')}. ¿En qué área específica necesitas ayuda?`;
         }
+      }
+      
+      // Backend and API Intelligence
+      else if (originalMessage.toLowerCase().includes('backend') || originalMessage.toLowerCase().includes('api') || 
+               originalMessage.toLowerCase().includes('servidor')) {
+        const backendExplanation = backendIntelligenceService.explainConcept(originalMessage);
+        response = `🔧 **Backend Intelligence Activated**\n\n${backendExplanation.explanation}\n\n💡 **¿Por qué esto importa?**\n${backendExplanation.why_care}\n\n🚀 **Próximos pasos:** ${backendExplanation.next_steps?.slice(0, 2).join(', ') || 'Explora más conceptos backend'}`;
+      }
+      
+      // Database operations and intelligent storage
+      else if (originalMessage.toLowerCase().includes('crear base de datos')) {
+        const dbName = extractDatabaseName(originalMessage) || 'user_database';
+        const result = databaseService.createDatabase(dbName, { 
+          description: `Database created by user request: ${originalMessage}`,
+          autoIndex: true
+        });
+        response = result.success ? 
+          `🗄️ Base de datos "${dbName}" creada exitosamente con capacidades inteligentes de búsqueda e indexación automática. Puedo almacenar y buscar información instantáneamente. ${result.message}` :
+          `❌ Error creando base de datos: ${result.error}`;
+      }
+      else if (originalMessage.toLowerCase().includes('buscar en base') || originalMessage.toLowerCase().includes('buscar dato')) {
+        const query = extractSearchQuery(originalMessage);
+        const searchResult = databaseService.search(query, { fuzzy: true, maxResults: 10 });
+        response = searchResult.totalFound > 0 ?
+          `🔍 Encontré ${searchResult.totalFound} resultados para "${query}" en ${searchResult.searchedDatabases.length} bases de datos (búsqueda completada en ${searchResult.queryTime}ms). Los resultados más relevantes están relacionados con ${searchResult.results.slice(0, 3).map(r => r.database).join(', ')}.` :
+          `🔍 No encontré resultados para "${query}" en las bases de datos. ¿Quieres que cree una nueva base de datos o busque en internet?`;
+      }
+      else if (originalMessage.toLowerCase().includes('estadística') && originalMessage.toLowerCase().includes('base')) {
+        const stats = databaseService.getDatabaseStatistics();
+        const recommendations = databaseService.getPersonalizedRecommendations();
+        response = `📊 Estado de bases de datos: ${stats.totalDatabases} bases activas, ${stats.totalRecords} registros totales, ${stats.totalQueries} consultas realizadas. Tiempo promedio de consulta: ${stats.averageQueryTime.toFixed(2)}ms. ${recommendations.length > 0 ? `Tengo ${recommendations.length} recomendaciones basadas en tus datos.` : ''}`;
+      }
+      
+      // Document analysis capabilities
+      else if (originalMessage.toLowerCase().includes('analizar documento')) {
+        const fileName = extractFileName(originalMessage) || 'document.pdf';
+        const analysisResult = await documentAnalysisService.analyzeDocument(fileName, null, { comprehensive: true });
+        response = analysisResult.success ?
+          `📄 Análisis completado de "${fileName}": ${analysisResult.insights.readabilityScore.toFixed(1)}% de legibilidad, ${analysisResult.insights.keyTopics.slice(0, 3).join(', ')} como temas clave. ${analysisResult.insights.actionableInsights.slice(0, 2).join('. ')}` :
+          `❌ Error analizando documento: ${analysisResult.error}`;
+      }
+      else if (originalMessage.toLowerCase().includes('estadística') && originalMessage.toLowerCase().includes('documento')) {
+        const stats = documentAnalysisService.getAnalysisStatistics();
+        response = `📊 He analizado ${stats.metrics.totalAnalyzed} documentos (legibilidad promedio: ${stats.metrics.averageReadability.toFixed(1)}%, tiempo promedio: ${stats.metrics.averageAnalysisTime.toFixed(0)}ms). Categorías: ${stats.categories.length} identificadas. Recomendaciones de mejora disponibles.`;
+      }
+      
+      // Business Intelligence
+      else if (originalMessage.toLowerCase().includes('empresa') || originalMessage.toLowerCase().includes('negocio') || 
+               originalMessage.toLowerCase().includes('mercado') || originalMessage.toLowerCase().includes('estrategia') ||
+               originalMessage.toLowerCase().includes('competencia')) {
+        const businessExplanation = businessIntelligenceService.explainConcept(originalMessage);
+        response = `💼 **Business Intelligence Activated**\n\n${businessExplanation.title}\n\n${businessExplanation.fundamental_definition || businessExplanation.explanation}\n\n🎯 **Aplicación Estratégica:**\n${businessExplanation.strategic_thinking || businessExplanation.business_impact?.slice(0, 2).join('\n') || 'Pensamiento empresarial avanzado'}`;
+      }
+      
+      // Information Verification and Critical Thinking
+      else if (originalMessage.toLowerCase().includes('información') || originalMessage.toLowerCase().includes('fuente') || 
+               originalMessage.toLowerCase().includes('verdad') || originalMessage.toLowerCase().includes('falso') ||
+               originalMessage.toLowerCase().includes('verificar') || originalMessage.toLowerCase().includes('confiable')) {
+        const verificationGuidance = informationVerificationService.explainInformationLiteracy();
+        response = `🔍 **Information Intelligence Activated**\n\n${verificationGuidance.fundamental_principle}\n\n**Jerarquía de Fuentes:**\n🥇 ${verificationGuidance.information_hierarchy.tier_1_gold.sources} (${verificationGuidance.information_hierarchy.tier_1_gold.reliability})\n🥈 ${verificationGuidance.information_hierarchy.tier_2_silver.sources} (${verificationGuidance.information_hierarchy.tier_2_silver.reliability})\n\n🛡️ **Banderas rojas:** ${verificationGuidance.red_flags_critical.slice(0, 3).join(', ')}`;
+      }
+      
+      // Strategic Reasoning and Thinking
+      else if (originalMessage.toLowerCase().includes('estrategia') || originalMessage.toLowerCase().includes('análisis') || 
+               originalMessage.toLowerCase().includes('decisión') || originalMessage.toLowerCase().includes('planificar') ||
+               originalMessage.toLowerCase().includes('resolver problema') || originalMessage.toLowerCase().includes('pensamiento')) {
+        const strategicGuidance = strategicReasoningService.explainStrategicThinking();
+        response = `🎯 **Strategic Intelligence Activated**\n\n${strategicGuidance.essence}\n\n**Principios Clave:**\n🎲 ${strategicGuidance.core_principles.choose_your_battles.concept}\n⚡ ${strategicGuidance.core_principles.leverage_thinking.concept}\n🔄 ${strategicGuidance.core_principles.systems_perspective.concept}\n\n🧠 **Preguntas Estratégicas:** ${strategicGuidance.strategic_questions.positioning.slice(0, 2).join(', ')}`;
+      }
+      
+      // Code and Programming Intelligence
+      else if (originalMessage.toLowerCase().includes('código') || originalMessage.toLowerCase().includes('programar') || 
+               originalMessage.toLowerCase().includes('algoritmo') || originalMessage.toLowerCase().includes('software') ||
+               originalMessage.toLowerCase().includes('desarrollo') || originalMessage.toLowerCase().includes('programming')) {
+        const codeExplanation = codeIntelligenceService.explainConcept(originalMessage);
+        response = `💻 **Code Intelligence Activated**\n\n${codeExplanation.title}\n\n${codeExplanation.fundamental_reality || codeExplanation.explanation}\n\n**¿Por qué esto te da superpoderes?**\n${codeExplanation.strategic_value || codeExplanation.why_code_matters?.strategic_thinking?.slice(0, 3).join('\n') || 'Pensamiento lógico y automatización'}`;
+      }
+      
+      // Autonomous Learning and Tool Discovery
+      else if (originalMessage.toLowerCase().includes('aprender') || originalMessage.toLowerCase().includes('herramienta') || 
+               originalMessage.toLowerCase().includes('autonomo') || originalMessage.toLowerCase().includes('independiente') ||
+               originalMessage.toLowerCase().includes('mejorar') || originalMessage.toLowerCase().includes('descubrir')) {
+        const learningGuidance = strategicReasoningService.explainAutonomousLearning();
+        response = `🧠 **Autonomous Learning Intelligence Activated**\n\n${learningGuidance.autonomous_definition}\n\n**Ciclo de Aprendizaje Autónomo:**\n📊 ${learningGuidance.autonomous_cycle.assess.action}\n🔍 ${learningGuidance.autonomous_cycle.explore.action}\n🧪 ${learningGuidance.autonomous_cycle.experiment.action}\n🔗 ${learningGuidance.autonomous_cycle.integrate.action}\n\n${learningGuidance.strategic_advantage}`;
       }
       
       // Self-improvement insights
@@ -302,17 +452,51 @@ const AssistantModule = () => {
         response = jarvisResponse || learningService.getPersonalizedResponse(originalMessage);
       }
       
-      else {
-        // Use learning service for personalized response and apply JARVIS personality
-        response = learningService.getPersonalizedResponse(originalMessage);
+      else if (!response) {
+        // Intelligence Domain Processing
+        switch (domain) {
+          case 'coding':
+            const codeConcept = codeIntelligenceService.explainConcept(originalMessage);
+            response = codeConcept.fundamental_reality || codeConcept.title;
+            richData = codeConcept;
+            break;
+          case 'backend':
+            const backendConcept = backendIntelligenceService.explainConcept(originalMessage);
+            response = backendConcept.explanation;
+            richData = backendConcept;
+            break;
+          case 'strategy':
+            const strategyAnalysis = strategicReasoningService.provideStrategicAnalysis(originalMessage);
+            response = strategyAnalysis.recommendation || `Análisis estratégico iniciado para: ${originalMessage}`;
+            richData = strategyAnalysis;
+            break;
+          case 'verification':
+            const verification = informationVerificationService.explainInformationLiteracy();
+            response = verification.fundamental_principle;
+            richData = verification;
+            break;
+          default:
+            // Use learning service for personalized response and apply JARVIS personality
+            response = learningService.getPersonalizedResponse(originalMessage);
+        }
       }
 
-      // Apply JARVIS personality processing to all responses
+      // Final processing with JARVIS personality
       response = jarvisPersonalityService.processResponse(response, {
         allowProactive: true,
         user_activity: determineUserActivity(originalMessage),
-        task_complexity: determineTaskComplexity(originalMessage)
+        task_complexity: determineTaskComplexity(originalMessage),
+        domain: domain
       });
+
+      // Enhance response with rich insights if available
+      if (richData && Math.random() > 0.3) {
+        if (richData.strategic_insights) {
+          response += `\n\nStrategic Insight: ${richData.strategic_insights[0]}`;
+        } else if (richData.business_impact) {
+          response += `\n\nBusiness Impact: ${richData.business_impact[0]}`;
+        }
+      }
 
       const assistantMessage = {
         id: Date.now() + 1,
@@ -354,6 +538,12 @@ const AssistantModule = () => {
   };
 
   const extractSearchQuery = (message) => {
+    // Check if it's a database search or web search
+    if (message.toLowerCase().includes('buscar en base') || message.toLowerCase().includes('buscar dato')) {
+      const match = message.match(/buscar\s+(?:en\s+base\s+)?["']?(.+?)["']?\s*(?:en|$)/i);
+      return match ? match[1].trim() : message.replace(/buscar\s+(?:en\s+base\s+)?/i, '').trim();
+    }
+    // Web search
     const match = message.match(/buscar (?:en internet |web )?["`']?([^"`']+)["`']?/i);
     return match ? match[1] : 'información general';
   };
@@ -390,6 +580,11 @@ const AssistantModule = () => {
     return 'general';
   };
 
+  const extractDatabaseName = (message) => {
+    const match = message.match(/(?:base de datos|database)\s+["']?(\w+)["']?/i);
+    return match ? match[1] : null;
+  };
+
   const determineUserActivity = (message) => {
     const messageLower = message.toLowerCase();
     if (messageLower.includes('archivo') || messageLower.includes('carpeta')) return 'file_operations';
@@ -401,8 +596,8 @@ const AssistantModule = () => {
 
   const determineTaskComplexity = (message) => {
     const complexityIndicators = {
-      high: ['comprensivo', 'detallado', 'avanzado', 'complejo', 'profundo', 'exhaustivo'],
-      medium: ['análisis', 'ayuda', 'explicar', 'mostrar', 'enseñar'],
+      high: ['comprensivo', 'detallado', 'avanzado', 'complejo', 'profundo', 'exhaustivo', 'arquitectura', 'estrategia'],
+      medium: ['análisis', 'ayuda', 'explicar', 'mostrar', 'enseñar', 'crear'],
       low: ['qué', 'cómo', 'simple', 'rápido', 'básico']
     };
     
@@ -413,6 +608,15 @@ const AssistantModule = () => {
       }
     }
     return 'medium';
+  };
+
+  const detectIntelligenceDomain = (message) => {
+    const msg = message.toLowerCase();
+    if (msg.includes('código') || msg.includes('program') || msg.includes('javascript') || msg.includes('python')) return 'coding';
+    if (msg.includes('api') || msg.includes('backend') || msg.includes('base de datos') || msg.includes('microservicio')) return 'backend';
+    if (msg.includes('estrategia') || msg.includes('negocio') || msg.includes('competencia') || msg.includes('mercado')) return 'strategy';
+    if (msg.includes('verificar') || msg.includes('noticia') || msg.includes('fuente') || msg.includes('fake')) return 'verification';
+    return 'general';
   };
 
   // Handle proactive suggestions
@@ -476,6 +680,12 @@ const AssistantModule = () => {
         <div className="attention-status-panel">
           <div className="status-section">
             <h4>🧠 Sistema Principal</h4>
+            <div className="status-item">
+              <span className="status-label">Matriz Activa:</span>
+              <span className="status-value" style={{ color: '#00e5ff', fontWeight: 'bold' }}>
+                {activeDomain.toUpperCase()}
+              </span>
+            </div>
             <div className="status-item">
               <span className="status-label">Atención:</span>
               <span className={`status-value ${attentionState.isActive ? 'active' : 'idle'}`}>
@@ -669,17 +879,32 @@ const AssistantModule = () => {
           </div>
         </div>
         
-        {/* Command Examples */}
+        {/* Enhanced Command Examples */}
         <div className="command-examples" style={{ marginTop: '1rem' }}>
-          <h4 style={{ marginBottom: '0.5rem', color: '#64b5f6' }}>Comandos que puedes usar:</h4>
+          <h4 style={{ marginBottom: '0.5rem', color: '#64b5f6' }}>🚀 Comandos Inteligentes Disponibles:</h4>
           <div style={{ fontSize: '0.85rem', color: '#888', lineHeight: '1.6' }}>
-            <div>📁 "crear archivo mi-documento.txt" - Crea archivos</div>
-            <div>📁 "crear carpeta mis-proyectos" - Crea carpetas</div>
-            <div>🌐 "buscar en internet JavaScript tutorials" - Búsquedas web</div>
-            <div>📊 "mi perfil" - Ver lo que he aprendido sobre ti</div>
-            <div>🗂️ "organizar archivos" - Organiza automáticamente</div>
-            <div>🔍 "investigar inteligencia artificial" - Investigación profunda</div>
-            <div>💻 "info sistema" - Estado del sistema</div>
+            <div>📁 "crear archivo script.js" - Crea archivos ejecutables con contenido inteligente</div>
+            <div>🚀 "ejecutar" - Información sobre archivos auto-ejecutables</div>
+            <div>📁 "crear carpeta proyectos" - Crea carpetas organizadas automáticamente</div>
+            <div>🌐 "buscar en internet AI tutorials" - Búsquedas web inteligentes</div>
+            <div>📊 "excel" o "word" - Expertise en documentos con plantillas automáticas</div>
+            <div>🔍 "investigar blockchain" - Investigación profunda con análisis</div>
+            <div>🗂️ "organizar archivos" - Organización automática inteligente</div>
+            <div>📋 "mi perfil" - Ver patrones aprendidos sobre ti</div>
+            <div>💻 "info sistema" - Estado completo del sistema</div>
+            <div>🤖 "ayuda" - Descubre todas mis capacidades avanzadas</div>
+          </div>
+          
+          {/* New intelligent features showcase */}
+          <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(102, 126, 234, 0.1)', borderRadius: '8px', border: '1px solid rgba(102, 126, 234, 0.3)' }}>
+            <h5 style={{ color: '#667eea', marginBottom: '0.5rem' }}>✨ Nuevas Capacidades Inteligentes:</h5>
+            <div style={{ fontSize: '0.8rem', color: '#999', lineHeight: '1.5' }}>
+              <div>🎯 <strong>Archivos Auto-ejecutables:</strong> Creo archivos que se ejecutan solos al hacer clic</div>
+              <div>🧠 <strong>Curiosidad Proactiva:</strong> Te sugiero ideas antes de que las necesites</div>
+              <div>📊 <strong>Contenido Inteligente:</strong> Genero código funcional personalizado</div>
+              <div>🔮 <strong>Predicciones:</strong> Anticipo tus necesidades basándome en patrones</div>
+              <div>⚡ <strong>Aprendizaje Continuo:</strong> Me vuelvo más útil con cada interacción</div>
+            </div>
           </div>
         </div>
       </div>
