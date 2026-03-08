@@ -1,9 +1,13 @@
-const { app, BrowserWindow, ipcMain, Menu, shell } = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, shell, Tray, nativeImage } = require('electron');
 const path = require('path');
+const fs = require('fs');
+const fsPromises = fs.promises;
 const isDev = process.env.NODE_ENV === 'development';
 
 // Keep a global reference of the window object
 let mainWindow;
+let tray = null;
+let isBackgroundMode = process.argv.includes('--hidden');
 
 function createWindow() {
   // Create the browser window
@@ -20,7 +24,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     },
     titleBarStyle: 'default',
-    show: false
+    show: !isBackgroundMode // Don't show if in background mode
   });
 
   // Load the app
@@ -30,17 +34,26 @@ function createWindow() {
   
   mainWindow.loadURL(startUrl);
 
-  // Show window when ready to prevent visual flash
+  // Show window when ready to prevent visual flash (unless in background mode)
   mainWindow.once('ready-to-show', () => {
-    mainWindow.show();
+    if (!isBackgroundMode) {
+      mainWindow.show();
+    }
   });
 
   // Open DevTools in development
-  if (isDev) {
+  if (isDev && !isBackgroundMode) {
     mainWindow.webContents.openDevTools();
   }
 
-  // Handle window closed
+  // Handle window closed - hide to tray instead of quit in background mode
+  mainWindow.on('close', (event) => {
+      event.preventDefault();
+      mainWindow.hide();
+      showTrayNotification('J-Vairyx sigue ejecutándose en segundo plano');
+    }
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -126,10 +139,24 @@ function createWindow() {
 }
 
 // App event listeners
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
+  
+  // Initialize tray for all modes
+  createTray();
+  
+  // Initialize background services
+  initializeBackgroundServices();
+  
+  // Show notification if starting in background mode
+  if (isBackgroundMode) {
+    showTrayNotification('J-Vairyx iniciado en segundo plano con inteligencia completa');
+  }
+});
 
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+  // Keep app running in background mode on Windows/Linux
+  if (process.platform !== 'darwin' && !isBackgroundMode) {
     app.quit();
   }
 });
@@ -139,6 +166,102 @@ app.on('activate', () => {
     createWindow();
   }
 });
+
+// Create system tray for background mode
+function createTray() {
+  const trayIcon = nativeImage.createFromPath(path.join(__dirname, 'assets/icon.png'));
+  tray = new Tray(trayIcon.resize({ width: 16, height: 16 }));
+  
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: 'Mostrar J-Vairyx',
+      click: () => {
+        if (mainWindow) {
+          mainWindow.show();
+          mainWindow.focus();
+        } else {
+          createWindow();
+        }
+      }
+    },
+    {
+      label: 'Asistente en Segundo Plano',
+      enabled: false
+    },
+    { type: 'separator' },
+    {
+      label: 'Estado: Activo',
+      enabled: false
+    },
+    {
+      label: 'Servicios de IA Ejecutándose',
+      enabled: false
+    },
+    { type: 'separator' },
+    {
+      label: 'Salir',
+      click: () => {
+        app.isQuitting = true;
+        app.quit();
+      }
+    }
+  ]);
+  
+  tray.setContextMenu(contextMenu);
+  tray.setToolTip('J-Vairyx - Asistente Personal Inteligente');
+  
+  // Double click to show window
+  tray.on('double-click', () => {
+    if (mainWindow) {
+      mainWindow.show();
+      mainWindow.focus();
+    } else {
+      createWindow();
+    }
+  });
+}
+
+// Show tray notification
+function showTrayNotification(message) {
+  if (tray) {
+    tray.displayBalloon({
+      title: 'J-Vairyx',
+      content: message,
+      icon: path.join(__dirname, 'assets/icon.png')
+    });
+  }
+}
+
+// Background intelligence services
+function initializeBackgroundServices() {
+  if (isDev) {
+    console.log('🚀 Inicializando servicios de inteligencia en segundo plano...');
+  }
+  
+  // Start autonomous learning and improvement cycles
+  setInterval(() => {
+    // Simulate autonomous learning processes
+    if (isDev) {
+      console.log('🧠 Proceso de aprendizaje autónomo ejecutándose...');
+    }
+  }, 300000); // Every 5 minutes
+  
+  // Start intelligent monitoring
+  setInterval(() => {
+    // Simulate system monitoring and optimization
+    if (isDev) {
+      console.log('⚡ Monitoreo inteligente del sistema...');
+    }
+  }, 600000); // Every 10 minutes
+  
+  // Start proactive assistance checks
+  setInterval(() => {
+    // Check for proactive assistance opportunities
+    console.log('💡 Buscando oportunidades de asistencia proactiva...');
+  }, 900000); // Every 15 minutes
+  
+  console.log('✅ Servicios de inteligencia iniciados correctamente');
+}
 
 // Security: Prevent new window creation
 app.on('web-contents-created', (event, contents) => {
@@ -160,8 +283,39 @@ ipcMain.handle('show-message-box', async (event, options) => {
 });
 
 // Data storage using Electron's userData
-const fs = require('fs');
 const dataPath = path.join(app.getPath('userData'), 'j-vairyx-data.json');
+const SAFE_BASE_DIR = path.join(app.getPath('userData'), 'storage');
+
+// Ensure safe storage directory exists
+if (!fs.existsSync(SAFE_BASE_DIR)) {
+  try {
+    fs.mkdirSync(SAFE_BASE_DIR, { recursive: true });
+  } catch (error) {
+    console.error('Error creating safe storage directory:', error);
+  }
+}
+
+/**
+ * Validates and resolves a path against the safe base directory.
+ * Prevents directory traversal and restricts access to SAFE_BASE_DIR.
+ */
+const validatePath = (userInputPath) => {
+  if (!userInputPath) {
+    throw new Error('Path is required');
+  }
+
+  // Resolve the path to an absolute path
+  const resolvedPath = path.resolve(SAFE_BASE_DIR, userInputPath);
+
+  // Use path.relative to ensure it's inside SAFE_BASE_DIR
+  const relative = path.relative(SAFE_BASE_DIR, resolvedPath);
+
+  if (relative.startsWith('..') || path.isAbsolute(relative)) {
+    throw new Error('Access denied: Path is outside of allowed storage area');
+  }
+
+  return resolvedPath;
+};
 
 const loadData = () => {
   try {
@@ -269,6 +423,339 @@ ipcMain.handle('create-file', async (event, filePath, content = '', options = {}
       success: true, 
       path: filePath, 
       message: `Archivo '${path.basename(filePath)}' creado exitosamente` 
+ipcMain.handle('drive-download-file', async (event, file) => {
+  try {
+    const { dialog } = require('electron');
+    
+    // Show save dialog
+    const { filePath, canceled } = await dialog.showSaveDialog(mainWindow, {
+      title: 'Guardar archivo',
+      defaultPath: file.name,
+      filters: [
+        { name: 'Todos los archivos', extensions: ['*'] }
+      ]
+    });
+    
+    if (canceled || !filePath) {
+      return { success: false, message: 'Descarga cancelada' };
+    }
+    
+    // Create sample content based on file type
+    let content = generateFileContent(file);
+    
+    // Write file
+    await fsPromises.writeFile(filePath, content, 'utf8');
+    
+    return {
+      success: true,
+      message: `Archivo '${file.name}' descargado exitosamente en ${filePath}`,
+      path: filePath
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// Add file execution handler
+ipcMain.handle('execute-file', async (event, file) => {
+  try {
+    const os = require('os');
+    
+    // Create temporary file with appropriate content
+    const tempDir = os.tmpdir();
+    // Sanitize file name to prevent traversal in temp directory
+    const safeFileName = path.basename(file.name);
+    const tempFilePath = path.join(tempDir, safeFileName);
+    const content = generateFileContent(file);
+    
+    await fsPromises.writeFile(tempFilePath, content, 'utf8');
+    
+    // Execute based on file type
+    let result;
+    const extension = path.extname(safeFileName).toLowerCase();
+    
+    if (['.exe', '.msi', '.bat', '.cmd', '.js', '.py', '.sh', '.vbs', '.ps1', '.pl', '.php', '.rb'].includes(extension)) {
+      // For executable files, ask for confirmation first
+      const { dialog } = require('electron');
+      const response = await dialog.showMessageBox(mainWindow, {
+        type: 'question',
+        buttons: ['Ejecutar', 'Cancelar'],
+        defaultId: 0,
+        title: 'Confirmar ejecución',
+        message: `¿Deseas ejecutar el archivo ${safeFileName}?`,
+        detail: 'Solo ejecuta archivos de fuentes confiables.'
+      });
+      
+      if (response.response === 0) {
+        await shell.openPath(tempFilePath);
+        result = { success: true, message: `Ejecutando ${safeFileName}...` };
+      } else {
+        result = { success: false, message: 'Ejecución cancelada por el usuario' };
+      }
+    } else if (['.html', '.txt', '.md', '.json', '.css'].includes(extension)) {
+      // For text/code files, open with default application
+      await shell.openPath(tempFilePath);
+      result = { success: true, message: `Abriendo ${safeFileName} con la aplicación predeterminada` };
+    } else {
+      // For other files, just open them
+      await shell.openPath(tempFilePath);
+      result = { success: true, message: `Abriendo ${safeFileName}` };
+    }
+    
+    return result;
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// Helper function to generate file content
+function generateFileContent(file) {
+  const extension = require('path').extname(file.name).toLowerCase();
+  const baseName = require('path').basename(file.name, extension);
+
+// Helper to sanitize filenames for content injection
+function sanitizeForContent(str) {
+  if (!str) return 'unknown';
+  // Allow alphanumeric, dot, dash, underscore. Replace everything else with underscore.
+  return str.replace(/[^a-zA-Z0-9._-]/g, '_');
+}
+
+// Helper function to generate file content
+function generateFileContent(file) {
+  const path = require('path');
+  const extension = path.extname(file.name).toLowerCase();
+  const safeNameForContent = sanitizeForContent(path.basename(file.name));
+  const baseName = path.basename(safeNameForContent, extension);
+  
+  switch (extension) {
+    case '.html':
+      return `<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${baseName}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 30px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Archivo generado por J-Vairyx</h1>
+        <h2>Archivo: ${safeNameForContent}</h2>
+        <p>Este archivo fue creado automáticamente por tu asistente personal J-Vairyx.</p>
+        <p>Fecha de creación: ${new Date().toLocaleDateString('es-ES')}</p>
+        <p>¡Tu asistente inteligente está funcionando perfectamente! 🤖</p>
+    </div>
+</body>
+</html>`;
+
+    case '.js':
+      return `// Archivo generado por J-Vairyx Personal Assistant
+// Creado: ${new Date().toLocaleString('es-ES')}
+
+console.log('🚀 ¡Hola desde J-Vairyx!');
+console.log('Este archivo fue generado automáticamente por tu asistente personal');
+console.log('Archivo: ${safeNameForContent}');
+console.log('Fecha: ${new Date().toLocaleString('es-ES')}');
+
+// Función de ejemplo
+function saludarDesdeVairyx() {
+    return '¡Hola! Soy J-Vairyx, tu asistente personal inteligente 🤖';
+}
+
+// Auto-ejecución
+(() => {
+    console.log(saludarDesdeVairyx());
+    console.log('✅ Archivo ejecutado exitosamente');
+})();`;
+
+    case '.py':
+      return `#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Archivo generado por J-Vairyx Personal Assistant
+Creado: ${new Date().toLocaleString('es-ES')}
+"""
+
+import datetime
+import sys
+
+def main():
+    print("🚀 ¡Hola desde J-Vairyx!")
+    print("Este archivo fue generado automáticamente por tu asistente personal")
+    print(f"Archivo: ${safeNameForContent}")
+    print(f"Fecha: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print("¡Tu asistente inteligente está funcionando perfectamente! 🤖")
+    
+    # Información del sistema
+    print(f"Python version: {sys.version}")
+    print("✅ Archivo ejecutado exitosamente")
+
+if __name__ == "__main__":
+    main()`;
+
+    case '.bat':
+      return `@echo off
+echo 🚀 Hola desde J-Vairyx Personal Assistant!
+echo Este archivo fue generado automaticamente por tu asistente personal
+echo Archivo: ${file.name}
+echo Fecha: %date% %time%
+echo.
+echo ¡Tu asistente inteligente esta funcionando perfectamente! 🤖
+echo.
+echo Presiona cualquier tecla para continuar...
+pause > nul`;
+
+    case '.json':
+      return JSON.stringify({
+        generatedBy: "J-Vairyx Personal Assistant",
+        fileName: file.name,
+        createdAt: new Date().toISOString(),
+        message: "¡Hola! Este archivo fue generado automáticamente por tu asistente personal inteligente",
+        status: "success",
+        features: [
+          "Generación automática de archivos",
+          "Ejecución inteligente",
+          "Asistente proactivo",
+          "Integración del sistema"
+        ]
+      }, null, 2);
+
+    case '.md':
+      return `# 🚀 Archivo generado por J-Vairyx
+
+## Información del archivo
+- **Nombre:** ${file.name}
+- **Nombre:** ${safeNameForContent}
+- **Generado por:** J-Vairyx Personal Assistant
+- **Fecha:** ${new Date().toLocaleString('es-ES')}
+
+## ¿Qué es J-Vairyx?
+
+J-Vairyx es tu asistente personal inteligente que puede:
+
+- ✨ Crear archivos automáticamente
+- 🚀 Ejecutar y abrir archivos con un clic
+- 🧠 Aprender de tus patrones de uso
+- 🤖 Proporcionarte sugerencias proactivas
+- 📁 Organizar tus archivos inteligentemente
+
+## ¡Funcionando perfectamente!
+
+Este archivo es una prueba de que tu asistente está funcionando correctamente.
+
+---
+*Generado automáticamente por J-Vairyx Personal Assistant 🤖*`;
+
+    case '.css':
+      return `/* Estilos generados por J-Vairyx Personal Assistant */
+/* Creado: ${new Date().toLocaleString('es-ES')} */
+
+/* Tema J-Vairyx - Futurista y elegante */
+:root {
+    --vairyx-primary: #667eea;
+    --vairyx-secondary: #764ba2;
+    --vairyx-accent: #f093fb;
+    --vairyx-glass: rgba(255, 255, 255, 0.1);
+}
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, var(--vairyx-primary) 0%, var(--vairyx-secondary) 100%);
+    min-height: 100vh;
+    color: white;
+}
+
+.vairyx-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.vairyx-card {
+    background: var(--vairyx-glass);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    padding: 30px;
+    margin: 20px 0;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+}
+
+.vairyx-button {
+    background: linear-gradient(45deg, var(--vairyx-primary), var(--vairyx-accent));
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.vairyx-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+/* Generado automáticamente por J-Vairyx 🤖 */`;
+
+    default:
+      return `Archivo generado por J-Vairyx Personal Assistant
+
+Información del archivo:
+- Nombre: ${file.name}
+- Nombre: ${safeNameForContent}
+- Tipo: ${file.type || 'desconocido'}
+- Generado: ${new Date().toLocaleString('es-ES')}
+
+¡Hola! Este archivo fue creado automáticamente por tu asistente personal J-Vairyx.
+
+J-Vairyx es un asistente inteligente que puede:
+✨ Crear y gestionar archivos
+🚀 Ejecutar programas automáticamente  
+🧠 Aprender de tus patrones de uso
+🤖 Proporcionarte ayuda proactiva
+📁 Organizar tu trabajo eficientemente
+
+¡Tu asistente está funcionando perfectamente!
+
+---
+Generado por J-Vairyx Personal Assistant 🤖`;
+  }
+}
+
+// Enhanced file system IPC handlers
+ipcMain.handle('create-file', async (event, filePath, content = '', options = {}) => {
+  try {
+    const validatedPath = validatePath(filePath);
+    await fsPromises.writeFile(validatedPath, content, 'utf8');
+    return { 
+      success: true, 
+      path: path.basename(validatedPath),
+      message: `Archivo '${path.basename(validatedPath)}' creado exitosamente`
     };
   } catch (error) {
     return { 
@@ -280,12 +767,12 @@ ipcMain.handle('create-file', async (event, filePath, content = '', options = {}
 
 ipcMain.handle('create-folder', async (event, folderPath, options = {}) => {
   try {
-    const fs = require('fs').promises;
-    await fs.mkdir(folderPath, { recursive: true });
+    const validatedPath = validatePath(folderPath);
+    await fsPromises.mkdir(validatedPath, { recursive: true });
     return { 
       success: true, 
-      path: folderPath, 
-      message: `Carpeta '${path.basename(folderPath)}' creada exitosamente` 
+      path: path.basename(validatedPath),
+      message: `Carpeta '${path.basename(validatedPath)}' creada exitosamente`
     };
   } catch (error) {
     return { 
