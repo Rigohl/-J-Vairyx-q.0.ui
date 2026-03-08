@@ -172,6 +172,7 @@ class CuriosityService {
       if (this.shouldGenerateProactiveSuggestion()) {
         this.generateProactiveSuggestion();
       }
+    }, 120000); // Every 2 minutes for more responsiveness
       this.evaluateResearchOpportunities();
       this.suggestKnowledgeExpansion();
       this.analyzeCurrentContext();

@@ -499,6 +499,10 @@ ipcMain.handle('execute-file', async (event, file) => {
   }
 });
 
+// Helper function to generate file content
+function generateFileContent(file) {
+  const extension = require('path').extname(file.name).toLowerCase();
+  const baseName = require('path').basename(file.name, extension);
 
 // Helper to sanitize filenames for content injection
 function sanitizeForContent(str) {
@@ -600,7 +604,7 @@ if __name__ == "__main__":
       return `@echo off
 echo 🚀 Hola desde J-Vairyx Personal Assistant!
 echo Este archivo fue generado automaticamente por tu asistente personal
-echo Archivo: ${safeNameForContent}
+echo Archivo: ${file.name}
 echo Fecha: %date% %time%
 echo.
 echo ¡Tu asistente inteligente esta funcionando perfectamente! 🤖
@@ -627,6 +631,7 @@ pause > nul`;
       return `# 🚀 Archivo generado por J-Vairyx
 
 ## Información del archivo
+- **Nombre:** ${file.name}
 - **Nombre:** ${safeNameForContent}
 - **Generado por:** J-Vairyx Personal Assistant
 - **Fecha:** ${new Date().toLocaleString('es-ES')}
@@ -707,6 +712,7 @@ body {
 ==============================================
 
 Información del archivo:
+- Nombre: ${file.name}
 - Nombre: ${safeNameForContent}
 - Tipo: ${file.type || 'desconocido'}
 - Generado: ${new Date().toLocaleString('es-ES')}
