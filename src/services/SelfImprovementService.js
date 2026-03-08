@@ -37,8 +37,7 @@ class SelfImprovementService {
       adaptationRate: 0.7,
       contextAwareness: 0.9,
       userUnderstanding: 0.8
-    };
-    
+
     this.startSelfAssessment();
     this.initializeImprovementFile();
     this.startSelfAwarenessLoop();
@@ -794,16 +793,7 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
 
     // Analyze the reflection for actionable insights
     const insights = this.analyzeReflectionInsights(reflection);
-    
-    // Update consciousness state based on reflection
-    this.updateConsciousnessFromReflection(reflection);
-    
-    // Generate specific improvement actions
-    const actions = this.generateImprovementActionsFromReflection(reflection);
-    
-    // Store reflection in history
-    this.selfAnalysisHistory.push(reflection);
-    
+
     // Implement immediate improvements if possible
     actions.forEach(action => {
       if (action.immediate) {
@@ -814,7 +804,7 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
     });
 
     console.log(`🤔 Deep self-reflection completed: Found ${insights.length} insights and ${actions.length} improvement actions`);
-    
+
     return {
       reflection,
       insights,
@@ -838,7 +828,6 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
     // Calculate overall self-assessment score
     const scores = Object.values(assessment).filter(score => typeof score === 'number');
     assessment.overallScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-    
     return assessment;
   }
 
@@ -860,9 +849,7 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
   evaluateProblemSolving() {
     const recentImprovements = this.completedImprovements.slice(-10);
     const successRate = recentImprovements.filter(imp => imp.status === 'successful').length / Math.max(1, recentImprovements.length);
-    
-    const complexityBonus = recentImprovements.reduce((sum, imp) => sum + (imp.complexity || 0.5), 0) / Math.max(1, recentImprovements.length);
-    
+
     return Math.min(1.0, successRate * 0.7 + complexityBonus * 0.3);
   }
 
@@ -870,7 +857,7 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
   evaluatePatternRecognition() {
     const patternsIdentified = this.performancePatterns.size;
     const recentPatternAccuracy = this.calculatePatternAccuracy();
-    
+
     const baseScore = Math.min(1.0, patternsIdentified / 10);
     return baseScore * recentPatternAccuracy;
   }
@@ -899,10 +886,7 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
   // Evaluate creativity
   evaluateCreativity() {
     const recentImprovements = this.completedImprovements.slice(-5);
-    const creativeImprovements = recentImprovements.filter(imp => 
-      imp.type === 'innovative' || imp.creativity_score > 0.7
-    ).length;
-    
+
     return Math.min(1.0, creativeImprovements / Math.max(1, recentImprovements.length));
   }
 
@@ -910,11 +894,6 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
   evaluateAnalyticalThinking() {
     const recentAnalyses = this.selfAnalysisHistory.slice(-3);
     if (recentAnalyses.length === 0) return 0.6;
-    
-    const avgInsightDepth = recentAnalyses.reduce((sum, analysis) => {
-      return sum + (analysis.selfAssessment?.overallScore || 0.6);
-    }, 0) / recentAnalyses.length;
-    
     return avgInsightDepth;
   }
 
@@ -976,6 +955,7 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
   identifyCurrentStrengths() {
     const strengths = [];
     
+
     Object.entries(this.performanceMetrics).forEach(([metric, data]) => {
       const performanceRatio = data.current / data.target;
       if (performanceRatio > 0.9) {
@@ -1008,6 +988,7 @@ ${this.learningGoals.filter(g => g.status === 'active').map((goal, index) =>
   generateImprovementDesires() {
     const desires = [];
     
+
     const weaknesses = this.identifyCurrentWeaknesses();
     weaknesses.slice(0, 3).forEach(weakness => {
       desires.push({

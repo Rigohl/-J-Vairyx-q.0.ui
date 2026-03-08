@@ -1,0 +1,12 @@
+
+> j-vairyx-q.0.ui@0.0.1 react-start
+> webpack serve --mode development
+
+[webpack-cli] You need to install 'webpack-dev-server' for running 'webpack serve'.
+Error: Cannot find module 'webpack-dev-server'
+Require stack:
+- /usr/share/nodejs/@webpack-cli/serve/lib/index.js
+- /usr/share/nodejs/webpack-cli/lib/webpack-cli.js
+- /usr/share/nodejs/webpack-cli/lib/bootstrap.js
+- /usr/share/nodejs/webpack-cli/bin/cli.js
+- /usr/share/nodejs/webpack/bin/webpack.js

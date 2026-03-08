@@ -9,13 +9,7 @@ import deepResearchService from '../services/DeepResearchService';
 import selfImprovementService from '../services/SelfImprovementService';
 import jarvisPersonalityService from '../services/JarvisPersonalityService';
 import multiDomainExpertService from '../services/MultiDomainExpertService';
-import backendIntelligenceService from '../services/BackendIntelligenceService';
-import businessIntelligenceService from '../services/BusinessIntelligenceService';
-import informationVerificationService from '../services/InformationVerificationService';
-import strategicReasoningService from '../services/StrategicReasoningService';
-import codeIntelligenceService from '../services/CodeIntelligenceService';
-import databaseService from '../services/DatabaseService';
-import documentAnalysisService from '../services/DocumentAnalysisService';
+
 import '../styles/holographic.css';
 
 const AssistantModule = () => {
@@ -24,16 +18,7 @@ const AssistantModule = () => {
       id: 1,
       type: 'assistant',
       content: jarvisPersonalityService.processResponse(
-        '¡Hola! 🚀 Soy J-Vairyx, tu asistente personal con **inteligencia real y comprensión profunda**. \n\n🧠 **Mi nueva inteligencia incluye:**\n' +
-        '• **Backend & APIs**: Entiendo servidores, bases de datos y arquitectura de sistemas\n' +
-        '• **Inteligencia Empresarial**: Comprendo negocios, mercados y estrategia competitiva\n' +
-        '• **Verificación de Información**: Distingo fuentes confiables de desinformación\n' +
-        '• **Razonamiento Estratégico**: Pensamiento crítico y formación de estrategias\n' +
-        '• **Inteligencia de Código**: Entiendo programación y mejores prácticas\n' +
-        '• **Aprendizaje Autónomo**: Descubro herramientas y mejoro independientemente\n\n' +
-        '💡 **Puedo ayudarte con:** Crear archivos ejecutables, investigación profunda, análisis de negocios, verificación de fuentes, estrategias de código, automatización inteligente y mucho más.\n\n' +
-        '🎯 **Mi propósito**: Ser tu asistente más inteligente que busca las mejores herramientas de manera autónoma y te ayuda a tomar decisiones informadas. ¡Pregúntame sobre cualquier tema y verás mi inteligencia real en acción!',
-        { allowProactive: true, curiosityLevel: 'high' }
+
       ),
       timestamp: new Date()
     }
@@ -46,8 +31,7 @@ const AssistantModule = () => {
   const [attentionState, setAttentionState] = useState(curiosityService.getCurrentState().attention);
   const [suggestions, setSuggestions] = useState([]);
   const [showProactiveSuggestion, setShowProactiveSuggestion] = useState(false);
-  const [intelligenceLevel, setIntelligenceLevel] = useState('advanced');
-  const [curiosityMode, setCuriosityMode] = useState('active');
+  const [activeDomain, setActiveDomain] = useState('general');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -72,66 +56,27 @@ const AssistantModule = () => {
     return () => clearInterval(interval);
   }, [showProactiveSuggestion]);
 
-  // Enhanced proactive behavior with curiosity system
+  // Enhanced proactive behavior with JARVIS-like patterns
   useEffect(() => {
-    // Listen for curiosity suggestions from the service
-    const handleCuriositySuggestion = (event) => {
-      const suggestion = event.detail;
-      const proactiveMsg = {
-        id: Date.now(),
-        type: 'assistant',
-        content: `💡 **Sugerencia proactiva**: ${suggestion.message}`,
-        timestamp: new Date(),
-        isProactive: true,
-        suggestion: suggestion,
-        actions: suggestion.actions || []
-      };
-      
-      setMessages(prev => [...prev, proactiveMsg]);
-      setSuggestions(prev => [...prev, suggestion]);
-    };
-
-    // Enhanced proactive message generation
     const generateProactiveMessages = () => {
-      if (curiosityMode === 'active' && Math.random() > 0.7) { // 30% chance when active
-        const context = curiosityService.analyzeContext(currentMessage || '', 'assistant');
+      // Generate time-based proactive messages
+      const proactiveMessage = jarvisPersonalityService.generateProactiveMessage('time_based', {
+        user_activity: 'general',
+        tasks: messages.length
+      });
+      
+      if (proactiveMessage && Math.random() > 0.8) { // 20% chance to show proactive message
+        const proactiveMsg = {
+          id: Date.now(),
+          type: 'assistant',
+          content: proactiveMessage,
+          timestamp: new Date(),
+          isProactive: true
+        };
         
-        if (context.suggestions.length > 0) {
-          const suggestion = context.suggestions[0];
-          const proactiveMsg = {
-            id: Date.now(),
-            type: 'assistant',
-            content: `🤖 **J-Vairyx sugiere**: ${suggestion.message}`,
-            timestamp: new Date(),
-            isProactive: true,
-            suggestion: suggestion,
-            actions: suggestion.actions || []
-          };
-          
-          setMessages(prev => [...prev, proactiveMsg]);
-        }
+        setMessages(prev => [...prev, proactiveMsg]);
       }
-    };
-
-    // Add event listener for curiosity suggestions
-    if (typeof window !== 'undefined') {
-      window.addEventListener('vairyx-suggestion', handleCuriositySuggestion);
-    }
-
-    // Check for proactive suggestions periodically
-    const interval = setInterval(generateProactiveMessages, 30000); // Every 30 seconds
-    
-    return () => {
-      if (typeof window !== 'undefined') {
-        window.removeEventListener('vairyx-suggestion', handleCuriositySuggestion);
-      }
-      clearInterval(interval);
-    };
-  }, [curiosityMode, currentMessage]); // Dependencies for the useEffect
-
-  // Additional self-improvement useEffect
-  useEffect(() => {
-    const generateSelfImprovement = () => {
+      
       // Check for self-improvement opportunities
       if (Math.random() > 0.9) { // 10% chance to show self-improvement
         const improvement = selfImprovementService.generateProactiveImprovement();
@@ -153,13 +98,14 @@ const AssistantModule = () => {
     };
 
     // Generate proactive messages every 5 minutes
-    const proactiveInterval = setInterval(generateSelfImprovement, 5 * 60 * 1000);
+    const proactiveInterval = setInterval(generateProactiveMessages, 5 * 60 * 1000);
     
     // Initial proactive message after 30 seconds
     const initialTimeout = setTimeout(() => {
-      const welcomeProactive = jarvisPersonalityService.generateProactiveMessage('morning_briefing', {
+      const welcomeProactive = jarvisPersonalityService.generateProactiveMessage('time_based', {
         tasks: 'several priority items',
-        user_activity: 'initialization'
+        user_activity: 'initialization',
+        subtype: 'morning_briefing'
       });
       
       const welcomeMsg = {
@@ -235,49 +181,59 @@ const AssistantModule = () => {
     // Analyze context and generate intelligent response
     const context = curiosityService.analyzeContext(originalMessage, 'assistant');
     
+    // Neural Routing and domain detection
+    const domain = detectIntelligenceDomain(originalMessage);
+    setActiveDomain(domain);
+
     // Enhanced AI response with learning and system integration
     setTimeout(async () => {
       setIsSpeaking(true);
       
       let response = '';
+      let richData = null;
+
+      // Check for Protocols
+      if (originalMessage.toLowerCase().includes('protocolo')) {
+        const match = originalMessage.match(/protocolo (\d+)/i);
+        if (match) {
+          const protocolResult = jarvisPersonalityService.runProtocol(match[1]);
+          response = protocolResult.message;
+          if (protocolResult.success) {
+            learningService.logInteraction('protocol_activation', { protocol: match[1] });
+          }
+        }
+      }
       
       // Handle specific commands with enhanced capabilities
-      if (originalMessage.toLowerCase().includes('crear archivo')) {
+      if (!response && originalMessage.toLowerCase().includes('crear archivo')) {
         const fileName = extractFileName(originalMessage) || 'nuevo_archivo.txt';
         const result = await systemIntegrationService.createFile(fileName, '');
         response = result.success ? 
-          `🚀 ¡Increíble! He creado el archivo "${fileName}" con contenido inteligente. Este archivo es especial: contiene código generado automáticamente y se puede ejecutar directamente desde el Drive. ${result.message}` :
-          `❌ Hubo un problema creando el archivo: ${result.error}`;
+          `¡Perfecto! He creado el archivo "${fileName}". ${result.message}` :
+          `Hubo un problema creando el archivo: ${result.error}`;
         
-        // Add smart content generation and execution info
+        // Add document expertise if it's a document file
         if (fileName.includes('.xlsx') || fileName.includes('.docx') || fileName.includes('.pdf')) {
           const analysis = documentExpertService.analyzeDocument(fileName, '');
-          response += ` 📊 Como experto en ${analysis.type}, he incluido plantillas inteligentes y macros automáticos. ¡Haz clic en "Ejecutar" en el Drive para verlo en acción!`;
-        } else if (fileName.includes('.js') || fileName.includes('.py') || fileName.includes('.html')) {
-          response += ` 💻 ¡Este archivo contiene código funcional! Puedes ejecutarlo directamente haciendo clic en el botón "🚀 Ejecutar" en el módulo Drive. Se abrirá automáticamente y mostrará resultados.`;
+          response += ` Como experto en ${analysis.type}, puedo ayudarte con plantillas y optimizaciones.`;
         }
       }
       else if (originalMessage.toLowerCase().includes('crear carpeta')) {
         const folderName = extractFolderName(originalMessage) || 'nueva_carpeta';
         const result = await systemIntegrationService.createFolder(folderName);
         response = result.success ?
-          `📁 ¡Excelente! Carpeta "${folderName}" creada con organización inteligente. ${result.message} Puedo poblarla automáticamente con archivos relevantes si quieres.` :
-          `❌ Error creando la carpeta: ${result.error}`;
+          `¡Excelente! Carpeta "${folderName}" creada. ${result.message}` :
+          `Error creando la carpeta: ${result.error}`;
       }
       
-      // Enhanced document expertise with auto-execution
+      // Enhanced document expertise
       else if (originalMessage.toLowerCase().includes('excel') || originalMessage.toLowerCase().includes('hoja de cálculo')) {
         const expertise = documentExpertService.generateExcelFormulas('sum', { range: 'A1:A10' });
-        response = `📊 ¡Soy un maestro de Excel! Te ayudo con fórmulas avanzadas, macros inteligentes y análisis automático. Por ejemplo: ${expertise}. 🚀 ¿Quieres que cree un archivo Excel ejecutable con ejemplos prácticos? ¡Solo dile "crear archivo ejemplo.xlsx"!`;
+        response = `Como experto en Excel, puedo ayudarte con fórmulas, gráficos y análisis. Por ejemplo: ${expertise}. ¿Qué necesitas específicamente?`;
       }
       else if (originalMessage.toLowerCase().includes('word') || originalMessage.toLowerCase().includes('documento')) {
         const structure = documentExpertService.generateDocumentStructure('business', {});
-        response = `📝 ¡Perfecto! Soy experto en Word y documentación inteligente. Te sugiero esta estructura optimizada: ${structure.sections.slice(0, 3).join(', ')}... 🎯 ¿Quieres que genere un documento completo y ejecutable? ¡Puedo incluir plantillas que se autocomplementan!`;
-      }
-      
-      // Enhanced file execution suggestions
-      else if (originalMessage.toLowerCase().includes('ejecutar') || originalMessage.toLowerCase().includes('run')) {
-        response = `🚀 ¡Mi capacidad de ejecución automática es increíble! Puedo crear archivos que:\n\n✨ Se ejecuten automáticamente al hacer clic\n💻 Contengan código funcional (HTML, JS, Python, etc.)\n📊 Incluyan macros y automatizaciones\n🎯 Se abran con la aplicación correcta\n\n¿Qué tipo de archivo ejecutable necesitas? Solo dime el tipo y lo creo con contenido inteligente.`;
+        response = `Perfecto, soy experto en Word y documentos. Te sugiero esta estructura: ${structure.sections.slice(0, 3).join(', ')}... ¿Te ayudo a crear contenido específico?`;
       }
       
       // Survey helper capabilities  
@@ -448,17 +404,51 @@ const AssistantModule = () => {
         response = jarvisResponse || learningService.getPersonalizedResponse(originalMessage);
       }
       
-      else {
-        // Use learning service for personalized response and apply JARVIS personality
-        response = learningService.getPersonalizedResponse(originalMessage);
+      else if (!response) {
+        // Intelligence Domain Processing
+        switch (domain) {
+          case 'coding':
+            const codeConcept = codeIntelligenceService.explainConcept(originalMessage);
+            response = codeConcept.fundamental_reality || codeConcept.title;
+            richData = codeConcept;
+            break;
+          case 'backend':
+            const backendConcept = backendIntelligenceService.explainConcept(originalMessage);
+            response = backendConcept.explanation;
+            richData = backendConcept;
+            break;
+          case 'strategy':
+            const strategyAnalysis = strategicReasoningService.provideStrategicAnalysis(originalMessage);
+            response = strategyAnalysis.recommendation || `Análisis estratégico iniciado para: ${originalMessage}`;
+            richData = strategyAnalysis;
+            break;
+          case 'verification':
+            const verification = informationVerificationService.explainInformationLiteracy();
+            response = verification.fundamental_principle;
+            richData = verification;
+            break;
+          default:
+            // Use learning service for personalized response and apply JARVIS personality
+            response = learningService.getPersonalizedResponse(originalMessage);
+        }
       }
 
-      // Apply JARVIS personality processing to all responses
+      // Final processing with JARVIS personality
       response = jarvisPersonalityService.processResponse(response, {
         allowProactive: true,
         user_activity: determineUserActivity(originalMessage),
-        task_complexity: determineTaskComplexity(originalMessage)
+        task_complexity: determineTaskComplexity(originalMessage),
+        domain: domain
       });
+
+      // Enhance response with rich insights if available
+      if (richData && Math.random() > 0.3) {
+        if (richData.strategic_insights) {
+          response += `\n\nStrategic Insight: ${richData.strategic_insights[0]}`;
+        } else if (richData.business_impact) {
+          response += `\n\nBusiness Impact: ${richData.business_impact[0]}`;
+        }
+      }
 
       const assistantMessage = {
         id: Date.now() + 1,
@@ -558,8 +548,8 @@ const AssistantModule = () => {
 
   const determineTaskComplexity = (message) => {
     const complexityIndicators = {
-      high: ['comprensivo', 'detallado', 'avanzado', 'complejo', 'profundo', 'exhaustivo'],
-      medium: ['análisis', 'ayuda', 'explicar', 'mostrar', 'enseñar'],
+      high: ['comprensivo', 'detallado', 'avanzado', 'complejo', 'profundo', 'exhaustivo', 'arquitectura', 'estrategia'],
+      medium: ['análisis', 'ayuda', 'explicar', 'mostrar', 'enseñar', 'crear'],
       low: ['qué', 'cómo', 'simple', 'rápido', 'básico']
     };
     
@@ -570,6 +560,15 @@ const AssistantModule = () => {
       }
     }
     return 'medium';
+  };
+
+  const detectIntelligenceDomain = (message) => {
+    const msg = message.toLowerCase();
+    if (msg.includes('código') || msg.includes('program') || msg.includes('javascript') || msg.includes('python')) return 'coding';
+    if (msg.includes('api') || msg.includes('backend') || msg.includes('base de datos') || msg.includes('microservicio')) return 'backend';
+    if (msg.includes('estrategia') || msg.includes('negocio') || msg.includes('competencia') || msg.includes('mercado')) return 'strategy';
+    if (msg.includes('verificar') || msg.includes('noticia') || msg.includes('fuente') || msg.includes('fake')) return 'verification';
+    return 'general';
   };
 
   // Handle proactive suggestions
@@ -634,6 +633,12 @@ const AssistantModule = () => {
           <div className="status-section">
             <h4>🧠 Sistema Principal</h4>
             <div className="status-item">
+              <span className="status-label">Matriz Activa:</span>
+              <span className="status-value" style={{ color: '#00e5ff', fontWeight: 'bold' }}>
+                {activeDomain.toUpperCase()}
+              </span>
+            </div>
+            <div className="status-item">
               <span className="status-label">Atención:</span>
               <span className={`status-value ${attentionState.isActive ? 'active' : 'idle'}`}>
                 {attentionState.isActive ? '🟢 Activo' : '🟡 En pausa'}
@@ -665,33 +670,38 @@ const AssistantModule = () => {
             </div>
           </div>
 
-          <div className="status-section">
-            <h4>⚙️ Estado del Sistema</h4>
-            <div className="status-item">
-              <span className="status-label">Salud:</span>
-              <span className="status-value">
-                {(() => {
-                  const status = selfImprovementService.getImprovementStatus();
-                  return status.overall_health === 'Excelente' ? '🟢' :
-                         status.overall_health === 'Bueno' ? '🟡' :
-                         status.overall_health === 'Aceptable' ? '🟠' : '🔴';
-                })()}
-                {selfImprovementService.getImprovementStatus().overall_health}
-              </span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Mejoras:</span>
-              <span className="status-value">
-                {selfImprovementService.getImprovementStatus().pending_improvements} pendientes
-              </span>
-            </div>
-            <div className="status-item">
-              <span className="status-label">Personalidad:</span>
-              <span className="status-value">
-                {jarvisPersonalityService.getPersonalityInsights().sophistication_level > 0.8 ? '🎩 Sofisticado' : '🤖 Estándar'}
-              </span>
-            </div>
-          </div>
+          {(() => {
+            const status = selfImprovementService.getImprovementStatus();
+            const healthIcon =
+              status.overall_health === 'Excelente' ? '🟢' :
+              status.overall_health === 'Bueno' ? '🟡' :
+              status.overall_health === 'Aceptable' ? '🟠' : '🔴';
+
+            return (
+              <div className="status-section">
+                <h4>⚙️ Estado del Sistema</h4>
+                <div className="status-item">
+                  <span className="status-label">Salud:</span>
+                  <span className="status-value">
+                    {healthIcon}
+                    {status.overall_health}
+                  </span>
+                </div>
+                <div className="status-item">
+                  <span className="status-label">Mejoras:</span>
+                  <span className="status-value">
+                    {status.pending_improvements} pendientes
+                  </span>
+                </div>
+                <div className="status-item">
+                  <span className="status-label">Personalidad:</span>
+                  <span className="status-value">
+                    {jarvisPersonalityService.getPersonalityInsights().sophistication_level > 0.8 ? '🎩 Sofisticado' : '🤖 Estándar'}
+                  </span>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 
@@ -821,32 +831,17 @@ const AssistantModule = () => {
           </div>
         </div>
         
-        {/* Enhanced Command Examples */}
+        {/* Command Examples */}
         <div className="command-examples" style={{ marginTop: '1rem' }}>
-          <h4 style={{ marginBottom: '0.5rem', color: '#64b5f6' }}>🚀 Comandos Inteligentes Disponibles:</h4>
+          <h4 style={{ marginBottom: '0.5rem', color: '#64b5f6' }}>Comandos que puedes usar:</h4>
           <div style={{ fontSize: '0.85rem', color: '#888', lineHeight: '1.6' }}>
-            <div>📁 "crear archivo script.js" - Crea archivos ejecutables con contenido inteligente</div>
-            <div>🚀 "ejecutar" - Información sobre archivos auto-ejecutables</div>
-            <div>📁 "crear carpeta proyectos" - Crea carpetas organizadas automáticamente</div>
-            <div>🌐 "buscar en internet AI tutorials" - Búsquedas web inteligentes</div>
-            <div>📊 "excel" o "word" - Expertise en documentos con plantillas automáticas</div>
-            <div>🔍 "investigar blockchain" - Investigación profunda con análisis</div>
-            <div>🗂️ "organizar archivos" - Organización automática inteligente</div>
-            <div>📋 "mi perfil" - Ver patrones aprendidos sobre ti</div>
-            <div>💻 "info sistema" - Estado completo del sistema</div>
-            <div>🤖 "ayuda" - Descubre todas mis capacidades avanzadas</div>
-          </div>
-          
-          {/* New intelligent features showcase */}
-          <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(102, 126, 234, 0.1)', borderRadius: '8px', border: '1px solid rgba(102, 126, 234, 0.3)' }}>
-            <h5 style={{ color: '#667eea', marginBottom: '0.5rem' }}>✨ Nuevas Capacidades Inteligentes:</h5>
-            <div style={{ fontSize: '0.8rem', color: '#999', lineHeight: '1.5' }}>
-              <div>🎯 <strong>Archivos Auto-ejecutables:</strong> Creo archivos que se ejecutan solos al hacer clic</div>
-              <div>🧠 <strong>Curiosidad Proactiva:</strong> Te sugiero ideas antes de que las necesites</div>
-              <div>📊 <strong>Contenido Inteligente:</strong> Genero código funcional personalizado</div>
-              <div>🔮 <strong>Predicciones:</strong> Anticipo tus necesidades basándome en patrones</div>
-              <div>⚡ <strong>Aprendizaje Continuo:</strong> Me vuelvo más útil con cada interacción</div>
-            </div>
+            <div>📁 "crear archivo mi-documento.txt" - Crea archivos</div>
+            <div>📁 "crear carpeta mis-proyectos" - Crea carpetas</div>
+            <div>🌐 "buscar en internet JavaScript tutorials" - Búsquedas web</div>
+            <div>📊 "mi perfil" - Ver lo que he aprendido sobre ti</div>
+            <div>🗂️ "organizar archivos" - Organiza automáticamente</div>
+            <div>🔍 "investigar inteligencia artificial" - Investigación profunda</div>
+            <div>💻 "info sistema" - Estado del sistema</div>
           </div>
         </div>
       </div>
