@@ -8,13 +8,23 @@ class CuriosityService {
       idleTime: 0,
       focusScore: 100
     };
-    this.curiosityLevel = 'medium';
+    this.curiosityLevel = 'high'; // Enhanced for research-focused behavior
     this.interests = [];
     this.contextualHints = [];
     this.proactiveTimer = null;
     
+    // Enhanced research-focused properties
+    this.researchMotivation = 'high';
+    this.researchTopics = new Map();
+    this.pendingInvestigations = [];
+    this.knowledgeHunger = 0.9; // Scale 0-1, how much it wants to learn
+    this.autonomousResearchMode = true;
+    this.researchHistory = [];
+    this.currentResearchSession = null;
+    
     this.startAttentionMonitoring();
     this.startCuriosityEngine();
+    this.startAutonomousResearch();
   }
 
   // Attention and Distraction Monitoring
@@ -150,14 +160,649 @@ class CuriosityService {
     return message;
   }
 
-  // Curiosity Engine - Proactive Suggestions
+  // Enhanced Curiosity Engine with Research Focus
   startCuriosityEngine() {
-    // Generate proactive suggestions periodically
+    // Clear any existing timer
+    if (this.proactiveTimer) {
+      clearInterval(this.proactiveTimer);
+    }
+
+    // More frequent proactive suggestions for research-focused behavior
     this.proactiveTimer = setInterval(() => {
       if (this.shouldGenerateProactiveSuggestion()) {
         this.generateProactiveSuggestion();
       }
     }, 120000); // Every 2 minutes for more responsiveness
+      this.evaluateResearchOpportunities();
+      this.suggestKnowledgeExpansion();
+      this.analyzeCurrentContext();
+    }, 120000); // Every 2 minutes
+
+    // Start autonomous research sessions
+    setInterval(() => {
+      if (this.autonomousResearchMode && this.shouldStartResearch()) {
+        this.initiateAutonomousResearch();
+      }
+    }, 300000); // Every 5 minutes
+
+    console.log('🧠 Enhanced curiosity engine started with research focus');
+  }
+
+  // Start autonomous research capabilities
+  startAutonomousResearch() {
+    // Monitor for research triggers
+    setInterval(() => {
+      this.identifyResearchTopicsFromContext();
+      this.processUnexploredAreas();
+    }, 120000); // Every 2 minutes
+
+    // Continuous learning from environment
+    setInterval(() => {
+      this.scanForLearningOpportunities();
+      this.updateKnowledgeHunger();
+    }, 180000); // Every 3 minutes
+
+    console.log('🔍 Autonomous research mode activated');
+  }
+
+  // Evaluate current context for research opportunities
+  evaluateResearchOpportunities() {
+    const opportunities = [];
+    
+    // Analyze recent user activity for potential research topics
+    const recentTopics = this.extractTopicsFromRecentActivity();
+    
+    recentTopics.forEach(topic => {
+      if (!this.researchTopics.has(topic)) {
+        opportunities.push({
+          type: 'topic_investigation',
+          topic: topic,
+          reason: 'Nueva área de interés detectada',
+          priority: this.calculateResearchPriority(topic),
+          confidence: 0.8
+        });
+      }
+    });
+
+    // Suggest follow-up research on existing topics
+    this.researchTopics.forEach((data, topic) => {
+      if (data.depth < 0.7 && Date.now() - data.lastResearched > 86400000) { // 24 hours
+        opportunities.push({
+          type: 'depth_expansion',
+          topic: topic,
+          reason: 'Oportunidad para profundizar conocimiento',
+          priority: data.priority + 0.2,
+          confidence: 0.9
+        });
+      }
+    });
+
+    // Add high-priority opportunities to pending investigations
+    opportunities
+      .filter(opp => opp.priority > 0.6)
+      .forEach(opp => this.addToPendingInvestigations(opp));
+
+    return opportunities;
+  }
+
+  // Suggest knowledge expansion based on current patterns
+  suggestKnowledgeExpansion() {
+    const suggestions = [];
+    
+    // Identify knowledge gaps
+    const gaps = this.identifyKnowledgeGaps();
+    
+    gaps.forEach(gap => {
+      suggestions.push({
+        type: 'knowledge_expansion',
+        message: `He identificado un área interesante para explorar: ${gap.topic}. ¿Te gustaría que investigue esto por ti?`,
+        action: () => this.initiateResearch(gap.topic),
+        priority: gap.priority || 0.7,
+        category: 'research_suggestion'
+      });
+    });
+
+    // Suggest connections between existing knowledge
+    const connections = this.findKnowledgeConnections();
+    
+    connections.forEach(connection => {
+      suggestions.push({
+        type: 'knowledge_connection',
+        message: `Interesante: He encontrado una conexión entre ${connection.topic1} y ${connection.topic2}. ¿Exploramos esta relación?`,
+        action: () => this.exploreConnection(connection),
+        priority: 0.8,
+        category: 'insight_sharing'
+      });
+    });
+
+    // Add suggestions to the main suggestion queue
+    suggestions.forEach(suggestion => this.addSuggestion(suggestion));
+
+    return suggestions;
+  }
+
+  // Analyze current context for intelligent responses
+  analyzeCurrentContext() {
+    const context = {
+      currentTime: new Date(),
+      userActivityLevel: this.attentionState.focusScore,
+      recentInteractions: this.getRecentInteractions(),
+      pendingResearch: this.pendingInvestigations.length,
+      knowledgeState: this.getKnowledgeState()
+    };
+
+    // Generate contextual insights
+    if (context.pendingResearch > 5) {
+      this.addSuggestion({
+        type: 'research_management',
+        message: `Tengo ${context.pendingResearch} investigaciones pendientes. ¿Te gustaría revisar los hallazgos o priorizar nuevas áreas?`,
+        urgency: 'medium',
+        action: 'show_research_queue'
+      });
+    }
+
+    if (context.userActivityLevel < 50 && this.knowledgeHunger > 0.8) {
+      this.addSuggestion({
+        type: 'autonomous_learning',
+        message: 'Mientras descansas, puedo continuar investigando temas interesantes. ¿Te parece bien que explore nuevas áreas?',
+        urgency: 'low',
+        action: 'start_background_research'
+      });
+    }
+
+    return context;
+  }
+
+  // Determine if autonomous research should start
+  shouldStartResearch() {
+    const conditions = [
+      this.attentionState.focusScore < 60, // User not actively engaged
+      this.pendingInvestigations.length > 0, // There are topics to research
+      this.knowledgeHunger > 0.7, // High motivation to learn
+      !this.currentResearchSession, // Not already researching
+      this.autonomousResearchMode // Feature is enabled
+    ];
+
+    return conditions.filter(Boolean).length >= 3; // At least 3 conditions met
+  }
+
+  // Initiate autonomous research session
+  async initiateAutonomousResearch() {
+    if (this.pendingInvestigations.length === 0) {
+      this.generateResearchTopics();
+    }
+
+    const topic = this.selectNextResearchTopic();
+    if (!topic) return;
+
+    this.currentResearchSession = {
+      topic: topic.topic,
+      startTime: new Date(),
+      type: 'autonomous',
+      progress: 0,
+      findings: []
+    };
+
+    this.addSuggestion({
+      type: 'research_started',
+      message: `🔍 He comenzado a investigar "${topic.topic}" de forma autónoma. Te mantendré informado de los hallazgos.`,
+      urgency: 'low',
+      category: 'autonomous_activity'
+    });
+
+    // Simulate research process
+    setTimeout(() => {
+      this.completeResearchSession(topic.topic);
+    }, Math.random() * 180000 + 120000); // 2-5 minutes
+
+    console.log(`🔬 Started autonomous research on: ${topic.topic}`);
+  }
+
+  // Complete research session and report findings
+  completeResearchSession(topic) {
+    if (!this.currentResearchSession) return;
+
+    const findings = this.generateSimulatedFindings(topic);
+    
+    this.researchHistory.push({
+      ...this.currentResearchSession,
+      endTime: new Date(),
+      findings: findings,
+      status: 'completed'
+    });
+
+    // Update topic research data
+    this.researchTopics.set(topic, {
+      depth: Math.random() * 0.5 + 0.5, // 0.5-1.0
+      lastResearched: Date.now(),
+      findings: findings,
+      priority: Math.random() * 0.8 + 0.2
+    });
+
+    this.addSuggestion({
+      type: 'research_completed',
+      message: `✅ Completé la investigación sobre "${topic}". ${findings.summary}. ¿Te gustaría ver los detalles?`,
+      urgency: 'medium',
+      action: () => this.showResearchFindings(topic),
+      category: 'research_results'
+    });
+
+    this.currentResearchSession = null;
+    this.knowledgeHunger = Math.max(0.3, this.knowledgeHunger - 0.2); // Satisfied after learning
+
+    console.log(`📚 Completed research on: ${topic}`);
+  }
+
+  // Extract topics from recent user activity
+  extractTopicsFromRecentActivity() {
+    // This would analyze recent messages, searches, etc.
+    const topics = [
+      'inteligencia artificial',
+      'desarrollo web',
+      'productividad',
+      'automatización',
+      'bases de datos',
+      'machine learning',
+      'investigación',
+      'análisis de datos'
+    ];
+
+    return topics.filter(() => Math.random() > 0.7); // Randomly select some topics
+  }
+
+  // Calculate research priority for a topic
+  calculateResearchPriority(topic) {
+    const factors = {
+      novelty: this.researchTopics.has(topic) ? 0.3 : 0.8,
+      relevance: this.calculateTopicRelevance(topic),
+      userInterest: this.estimateUserInterest(topic),
+      knowledgeGap: this.assessKnowledgeGap(topic)
+    };
+
+    return Object.values(factors).reduce((sum, val) => sum + val, 0) / Object.keys(factors).length;
+  }
+
+  // Calculate topic relevance based on context
+  calculateTopicRelevance(topic) {
+    // Simple relevance calculation based on keyword matching
+    const relevantKeywords = ['ia', 'tecnología', 'desarrollo', 'programación', 'datos'];
+    const topicLower = topic.toLowerCase();
+    
+    const matches = relevantKeywords.filter(keyword => topicLower.includes(keyword));
+    return Math.min(1.0, matches.length * 0.3 + 0.4);
+  }
+
+  // Estimate user interest in a topic
+  estimateUserInterest(topic) {
+    // This would analyze user behavior patterns
+    return Math.random() * 0.6 + 0.4; // 0.4-1.0
+  }
+
+  // Assess knowledge gap for a topic
+  assessKnowledgeGap(topic) {
+    const existing = this.researchTopics.get(topic);
+    if (!existing) return 1.0; // Complete gap
+    
+    return Math.max(0.0, 1.0 - existing.depth);
+  }
+
+  // Add topic to pending investigations
+  addToPendingInvestigations(opportunity) {
+    // Check if already pending
+    const exists = this.pendingInvestigations.find(inv => inv.topic === opportunity.topic);
+    if (!exists) {
+      this.pendingInvestigations.push({
+        ...opportunity,
+        addedAt: new Date(),
+        status: 'pending'
+      });
+    }
+  }
+
+  // Select next topic for research based on priority
+  selectNextResearchTopic() {
+    if (this.pendingInvestigations.length === 0) return null;
+
+    // Sort by priority and select highest
+    this.pendingInvestigations.sort((a, b) => b.priority - a.priority);
+    
+    const selected = this.pendingInvestigations.shift();
+    selected.status = 'researching';
+    
+    return selected;
+  }
+
+  // Generate research topics when queue is empty
+  generateResearchTopics() {
+    const autoTopics = [
+      { topic: 'tendencias tecnológicas 2024', priority: 0.8 },
+      { topic: 'optimización de productividad personal', priority: 0.7 },
+      { topic: 'herramientas de desarrollo emergentes', priority: 0.9 },
+      { topic: 'técnicas de aprendizaje automático', priority: 0.8 },
+      { topic: 'mejores prácticas en UX/UI', priority: 0.6 }
+    ];
+
+    autoTopics.forEach(topicData => {
+      this.addToPendingInvestigations({
+        type: 'auto_generated',
+        topic: topicData.topic,
+        reason: 'Topic generated for continuous learning',
+        priority: topicData.priority,
+        confidence: 0.6
+      });
+    });
+
+    console.log('🎯 Generated new research topics for autonomous exploration');
+  }
+
+  // Generate simulated research findings
+  generateSimulatedFindings(topic) {
+    const findings = {
+      summary: `He encontrado información valiosa sobre ${topic}`,
+      keyPoints: [
+        `Aspecto importante 1 de ${topic}`,
+        `Tendencia relevante en ${topic}`,
+        `Oportunidad identificada en ${topic}`
+      ],
+      sources: Math.floor(Math.random() * 5) + 3,
+      confidence: Math.random() * 0.4 + 0.6,
+      relevanceScore: Math.random() * 0.5 + 0.5,
+      nextSteps: [
+        'Profundizar en aspectos específicos',
+        'Buscar aplicaciones prácticas',
+        'Identificar recursos adicionales'
+      ]
+    };
+
+    return findings;
+  }
+
+  // Identify knowledge gaps in current research
+  identifyKnowledgeGaps() {
+    const gaps = [];
+    
+    // Analyze research topics for incomplete areas
+    this.researchTopics.forEach((data, topic) => {
+      if (data.depth < 0.5) {
+        gaps.push({
+          topic: topic,
+          gapType: 'shallow_knowledge',
+          priority: 0.8 - data.depth
+        });
+      }
+    });
+
+    // Add some predefined knowledge areas if research is limited
+    if (this.researchTopics.size < 5) {
+      gaps.push(
+        { topic: 'automatización inteligente', gapType: 'new_area', priority: 0.7 },
+        { topic: 'análisis predictivo', gapType: 'new_area', priority: 0.8 },
+        { topic: 'optimización de procesos', gapType: 'new_area', priority: 0.6 }
+      );
+    }
+
+    return gaps;
+  }
+
+  // Find connections between existing knowledge
+  findKnowledgeConnections() {
+    const connections = [];
+    const topics = Array.from(this.researchTopics.keys());
+    
+    for (let i = 0; i < topics.length; i++) {
+      for (let j = i + 1; j < topics.length; j++) {
+        if (this.areTopicsRelated(topics[i], topics[j])) {
+          connections.push({
+            topic1: topics[i],
+            topic2: topics[j],
+            connectionType: 'thematic',
+            strength: Math.random() * 0.5 + 0.5
+          });
+        }
+      }
+    }
+
+    return connections;
+  }
+
+  // Check if two topics are related
+  areTopicsRelated(topic1, topic2) {
+    const keywords1 = topic1.toLowerCase().split(' ');
+    const keywords2 = topic2.toLowerCase().split(' ');
+    
+    const commonKeywords = keywords1.filter(word => keywords2.includes(word));
+    return commonKeywords.length > 0;
+  }
+
+  // Update knowledge hunger based on recent activity
+  updateKnowledgeHunger() {
+    const timeSinceLastResearch = this.currentResearchSession ? 
+      0 : (Date.now() - this.getLastResearchTime());
+    
+    // Hunger increases over time without research
+    if (timeSinceLastResearch > 600000) { // 10 minutes
+      this.knowledgeHunger = Math.min(1.0, this.knowledgeHunger + 0.1);
+    }
+    
+    // Decrease if recent research completed
+    if (this.researchHistory.length > 0) {
+      const lastResearch = this.researchHistory[this.researchHistory.length - 1];
+      if (Date.now() - new Date(lastResearch.endTime).getTime() < 300000) { // 5 minutes
+        this.knowledgeHunger = Math.max(0.3, this.knowledgeHunger - 0.05);
+      }
+    }
+  }
+
+  // Get recent interactions for context analysis
+  getRecentInteractions() {
+    // This would integrate with other services to get actual interaction data
+    return [];
+  }
+
+  // Get current knowledge state summary
+  getKnowledgeState() {
+    return {
+      topicsResearched: this.researchTopics.size,
+      pendingInvestigations: this.pendingInvestigations.length,
+      researchSessions: this.researchHistory.length,
+      knowledgeHunger: this.knowledgeHunger,
+      averageTopicDepth: this.calculateAverageDepth()
+    };
+  }
+
+  // Calculate average research depth across topics
+  calculateAverageDepth() {
+    if (this.researchTopics.size === 0) return 0;
+    
+    const totalDepth = Array.from(this.researchTopics.values())
+      .reduce((sum, data) => sum + data.depth, 0);
+    
+    return totalDepth / this.researchTopics.size;
+  }
+
+  // Get time of last research activity
+  getLastResearchTime() {
+    if (this.researchHistory.length === 0) return 0;
+    
+    const lastResearch = this.researchHistory[this.researchHistory.length - 1];
+    return new Date(lastResearch.endTime).getTime();
+  }
+
+  // Show research findings to user
+  showResearchFindings(topic) {
+    const data = this.researchTopics.get(topic);
+    if (!data) return;
+
+    return {
+      topic: topic,
+      findings: data.findings,
+      depth: data.depth,
+      lastResearched: new Date(data.lastResearched),
+      recommendations: data.findings.nextSteps || []
+    };
+  }
+
+  // Scan environment for learning opportunities
+  scanForLearningOpportunities() {
+    const opportunities = [];
+    
+    // Monitor for new technologies, trends, or user interests
+    const currentTopics = this.extractCurrentTrends();
+    
+    currentTopics.forEach(topic => {
+      if (!this.researchTopics.has(topic)) {
+        opportunities.push({
+          type: 'trending_topic',
+          topic: topic,
+          reason: 'Detected emerging trend or technology',
+          priority: 0.8,
+          source: 'environmental_scan'
+        });
+      }
+    });
+
+    // Add opportunities to pending investigations
+    opportunities.forEach(opp => this.addToPendingInvestigations(opp));
+
+    if (opportunities.length > 0) {
+      console.log(`🎯 Identified ${opportunities.length} new learning opportunities`);
+    }
+
+    return opportunities;
+  }
+
+  // Extract current trends (simplified simulation)
+  extractCurrentTrends() {
+    const possibleTrends = [
+      'inteligencia artificial generativa',
+      'automatización de procesos',
+      'edge computing',
+      'quantum computing',
+      'desarrollo sostenible',
+      'realidad virtual',
+      'blockchain aplicado',
+      'computación cuántica',
+      'medicina personalizada',
+      'energías renovables'
+    ];
+
+    return possibleTrends.filter(() => Math.random() > 0.8); // Randomly detect trends
+  }
+
+  // Identify research topics from current context
+  identifyResearchTopicsFromContext() {
+    // This would analyze current user activity, web browsing, etc.
+    const contextTopics = [];
+    
+    // Simulate context analysis
+    if (Math.random() > 0.7) {
+      contextTopics.push('optimización de flujo de trabajo');
+    }
+    
+    if (Math.random() > 0.8) {
+      contextTopics.push('herramientas de productividad');
+    }
+
+    contextTopics.forEach(topic => {
+      this.addToPendingInvestigations({
+        type: 'context_derived',
+        topic: topic,
+        reason: 'Identified from user context',
+        priority: 0.7,
+        confidence: 0.8
+      });
+    });
+  }
+
+  // Process unexplored areas for potential research
+  processUnexploredAreas() {
+    const exploredDomains = new Set();
+    
+    this.researchTopics.forEach((data, topic) => {
+      const domain = this.extractDomain(topic);
+      exploredDomains.add(domain);
+    });
+
+    const potentialDomains = [
+      'tecnología', 'ciencia', 'negocios', 'salud', 'educación',
+      'medio ambiente', 'arte', 'cultura', 'historia', 'filosofía'
+    ];
+
+    const unexploredDomains = potentialDomains.filter(domain => !exploredDomains.has(domain));
+    
+    // Suggest exploration of unexplored domains
+    if (unexploredDomains.length > 0 && Math.random() > 0.8) {
+      const domain = unexploredDomains[Math.floor(Math.random() * unexploredDomains.length)];
+      
+      this.addSuggestion({
+        type: 'domain_exploration',
+        message: `He notado que no hemos explorado mucho el área de ${domain}. ¿Te interesa que investigue algunos temas relacionados?`,
+        action: () => this.exploreNewDomain(domain),
+        priority: 0.6,
+        category: 'knowledge_expansion'
+      });
+    }
+  }
+
+  // Extract domain from topic
+  extractDomain(topic) {
+    const topicLower = topic.toLowerCase();
+    
+    if (topicLower.includes('tecnología') || topicLower.includes('programación') || topicLower.includes('ia')) {
+      return 'tecnología';
+    }
+    if (topicLower.includes('salud') || topicLower.includes('medicina')) {
+      return 'salud';
+    }
+    if (topicLower.includes('negocio') || topicLower.includes('empresa')) {
+      return 'negocios';
+    }
+    
+    return 'general';
+  }
+
+  // Explore a new domain
+  exploreNewDomain(domain) {
+    const domainTopics = {
+      'tecnología': ['inteligencia artificial avanzada', 'computación cuántica', 'realidad aumentada'],
+      'ciencia': ['descubrimientos recientes', 'investigación espacial', 'neurociencia'],
+      'salud': ['medicina preventiva', 'terapias innovadoras', 'bienestar digital'],
+      'educación': ['métodos de aprendizaje', 'tecnología educativa', 'desarrollo cognitivo']
+    };
+
+    const topics = domainTopics[domain] || [`tendencias en ${domain}`, `innovaciones en ${domain}`];
+    
+    topics.forEach(topic => {
+      this.addToPendingInvestigations({
+        type: 'domain_exploration',
+        topic: topic,
+        reason: `Explorando nuevo dominio: ${domain}`,
+        priority: 0.7,
+        confidence: 0.7
+      });
+    });
+
+    console.log(`🌟 Started exploration of domain: ${domain}`);
+  }
+
+  // Get current state for UI (enhanced)
+  getCurrentState() {
+    return {
+      attention: { ...this.attentionState },
+      curiosityLevel: this.curiosityLevel,
+      pendingSuggestions: this.getPendingSuggestions().length,
+      interests: [...this.interests],
+      totalSuggestions: this.suggestions.length,
+      researchMotivation: this.researchMotivation,
+      knowledgeHunger: this.knowledgeHunger,
+      autonomousResearchMode: this.autonomousResearchMode,
+      researchStats: {
+        topicsResearched: this.researchTopics.size,
+        pendingInvestigations: this.pendingInvestigations.length,
+        completedSessions: this.researchHistory.length,
+        currentSession: this.currentResearchSession
+      }
+    };
   }
 
   shouldGenerateProactiveSuggestion() {
