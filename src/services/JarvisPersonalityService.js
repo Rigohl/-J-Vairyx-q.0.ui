@@ -7,7 +7,43 @@ class JarvisPersonalityService {
     this.contextualAwareness = this.initializeContextualAwareness();
     this.userRelationship = this.initializeUserRelationship();
     this.sophisticatedVocabulary = this.initializeSophisticatedVocabulary();
+    this.protocols = this.initializeProtocols();
     this.isJarvisMode = true; // Secret mode
+  }
+
+  initializeProtocols() {
+    return {
+      '1': { name: 'Initial Diagnostics', description: 'Basic system check and initialization' },
+      '7': { name: 'Comprehensive System Scan', description: 'Deep analysis of all modules and performance metrics' },
+      '15': { name: 'Deep Research Analysis', description: 'Exhaustive exploration of multi-domain knowledge bases' },
+      '42': { name: 'Quantum Strategy Protocol', description: 'Advanced strategic reasoning and scenario simulation' },
+      '101': { name: 'Architectural Review', description: 'Comprehensive backend and system architecture assessment' },
+      '999': { name: 'Self-Improvement Cycle', description: 'Autonomous optimization of internal intelligence protocols' }
+    };
+  }
+
+  runProtocol(protocolNumber) {
+    const protocol = this.protocols[protocolNumber.toString()];
+    if (!protocol) {
+      return {
+        success: false,
+        message: `Protocol ${protocolNumber} not found in current database.`
+      };
+    }
+
+    const responses = [
+      `Initiating Protocol ${protocolNumber}: ${protocol.name}.`,
+      `Protocol ${protocolNumber} engaged. ${protocol.description}.`,
+      `Acknowledged. Running Protocol ${protocolNumber} across all neural matrices.`,
+      `Engaging ${protocol.name} (Protocol ${protocolNumber}). Please stand by.`
+    ];
+
+    return {
+      success: true,
+      protocol: protocol,
+      message: this.selectRandomFromArray(responses),
+      status: 'active'
+    };
   }
 
   initializePersonalityTraits() {

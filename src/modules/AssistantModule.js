@@ -9,6 +9,10 @@ import deepResearchService from '../services/DeepResearchService';
 import selfImprovementService from '../services/SelfImprovementService';
 import jarvisPersonalityService from '../services/JarvisPersonalityService';
 import multiDomainExpertService from '../services/MultiDomainExpertService';
+import codeIntelligenceService from '../services/CodeIntelligenceService';
+import backendIntelligenceService from '../services/BackendIntelligenceService';
+import informationVerificationService from '../services/InformationVerificationService';
+import strategicReasoningService from '../services/StrategicReasoningService';
 import '../styles/holographic.css';
 
 const AssistantModule = () => {
@@ -31,6 +35,7 @@ const AssistantModule = () => {
   const [attentionState, setAttentionState] = useState(curiosityService.getCurrentState().attention);
   const [suggestions, setSuggestions] = useState([]);
   const [showProactiveSuggestion, setShowProactiveSuggestion] = useState(false);
+  const [activeDomain, setActiveDomain] = useState('general');
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -180,14 +185,31 @@ const AssistantModule = () => {
     // Analyze context and generate intelligent response
     const context = curiosityService.analyzeContext(originalMessage, 'assistant');
     
+    // Neural Routing and domain detection
+    const domain = detectIntelligenceDomain(originalMessage);
+    setActiveDomain(domain);
+
     // Enhanced AI response with learning and system integration
     setTimeout(async () => {
       setIsSpeaking(true);
       
       let response = '';
+      let richData = null;
+
+      // Check for Protocols
+      if (originalMessage.toLowerCase().includes('protocolo')) {
+        const match = originalMessage.match(/protocolo (\d+)/i);
+        if (match) {
+          const protocolResult = jarvisPersonalityService.runProtocol(match[1]);
+          response = protocolResult.message;
+          if (protocolResult.success) {
+            learningService.logInteraction('protocol_activation', { protocol: match[1] });
+          }
+        }
+      }
       
       // Handle specific commands with enhanced capabilities
-      if (originalMessage.toLowerCase().includes('crear archivo')) {
+      if (!response && originalMessage.toLowerCase().includes('crear archivo')) {
         const fileName = extractFileName(originalMessage) || 'nuevo_archivo.txt';
         const result = await systemIntegrationService.createFile(fileName, '');
         response = result.success ? 
@@ -302,17 +324,51 @@ const AssistantModule = () => {
         response = jarvisResponse || learningService.getPersonalizedResponse(originalMessage);
       }
       
-      else {
-        // Use learning service for personalized response and apply JARVIS personality
-        response = learningService.getPersonalizedResponse(originalMessage);
+      else if (!response) {
+        // Intelligence Domain Processing
+        switch (domain) {
+          case 'coding':
+            const codeConcept = codeIntelligenceService.explainConcept(originalMessage);
+            response = codeConcept.fundamental_reality || codeConcept.title;
+            richData = codeConcept;
+            break;
+          case 'backend':
+            const backendConcept = backendIntelligenceService.explainConcept(originalMessage);
+            response = backendConcept.explanation;
+            richData = backendConcept;
+            break;
+          case 'strategy':
+            const strategyAnalysis = strategicReasoningService.provideStrategicAnalysis(originalMessage);
+            response = strategyAnalysis.recommendation || `Análisis estratégico iniciado para: ${originalMessage}`;
+            richData = strategyAnalysis;
+            break;
+          case 'verification':
+            const verification = informationVerificationService.explainInformationLiteracy();
+            response = verification.fundamental_principle;
+            richData = verification;
+            break;
+          default:
+            // Use learning service for personalized response and apply JARVIS personality
+            response = learningService.getPersonalizedResponse(originalMessage);
+        }
       }
 
-      // Apply JARVIS personality processing to all responses
+      // Final processing with JARVIS personality
       response = jarvisPersonalityService.processResponse(response, {
         allowProactive: true,
         user_activity: determineUserActivity(originalMessage),
-        task_complexity: determineTaskComplexity(originalMessage)
+        task_complexity: determineTaskComplexity(originalMessage),
+        domain: domain
       });
+
+      // Enhance response with rich insights if available
+      if (richData && Math.random() > 0.3) {
+        if (richData.strategic_insights) {
+          response += `\n\nStrategic Insight: ${richData.strategic_insights[0]}`;
+        } else if (richData.business_impact) {
+          response += `\n\nBusiness Impact: ${richData.business_impact[0]}`;
+        }
+      }
 
       const assistantMessage = {
         id: Date.now() + 1,
@@ -401,8 +457,8 @@ const AssistantModule = () => {
 
   const determineTaskComplexity = (message) => {
     const complexityIndicators = {
-      high: ['comprensivo', 'detallado', 'avanzado', 'complejo', 'profundo', 'exhaustivo'],
-      medium: ['análisis', 'ayuda', 'explicar', 'mostrar', 'enseñar'],
+      high: ['comprensivo', 'detallado', 'avanzado', 'complejo', 'profundo', 'exhaustivo', 'arquitectura', 'estrategia'],
+      medium: ['análisis', 'ayuda', 'explicar', 'mostrar', 'enseñar', 'crear'],
       low: ['qué', 'cómo', 'simple', 'rápido', 'básico']
     };
     
@@ -413,6 +469,15 @@ const AssistantModule = () => {
       }
     }
     return 'medium';
+  };
+
+  const detectIntelligenceDomain = (message) => {
+    const msg = message.toLowerCase();
+    if (msg.includes('código') || msg.includes('program') || msg.includes('javascript') || msg.includes('python')) return 'coding';
+    if (msg.includes('api') || msg.includes('backend') || msg.includes('base de datos') || msg.includes('microservicio')) return 'backend';
+    if (msg.includes('estrategia') || msg.includes('negocio') || msg.includes('competencia') || msg.includes('mercado')) return 'strategy';
+    if (msg.includes('verificar') || msg.includes('noticia') || msg.includes('fuente') || msg.includes('fake')) return 'verification';
+    return 'general';
   };
 
   // Handle proactive suggestions
@@ -476,6 +541,12 @@ const AssistantModule = () => {
         <div className="attention-status-panel">
           <div className="status-section">
             <h4>🧠 Sistema Principal</h4>
+            <div className="status-item">
+              <span className="status-label">Matriz Activa:</span>
+              <span className="status-value" style={{ color: '#00e5ff', fontWeight: 'bold' }}>
+                {activeDomain.toUpperCase()}
+              </span>
+            </div>
             <div className="status-item">
               <span className="status-label">Atención:</span>
               <span className={`status-value ${attentionState.isActive ? 'active' : 'idle'}`}>
