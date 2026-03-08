@@ -408,6 +408,21 @@ ipcMain.handle('drive-upload-file', async (event, filePath) => {
   return appData.files;
 });
 
+ipcMain.handle('drive-download-file', (event, fileId) => {
+  // In a real implementation, this would handle actual file downloads
+  const file = appData.files.find(f => f.id === fileId);
+  return file ? `Descargando: ${file.name}` : 'Archivo no encontrado';
+});
+
+// Enhanced file system IPC handlers
+ipcMain.handle('create-file', async (event, filePath, content = '', options = {}) => {
+  try {
+    const fs = require('fs').promises;
+    await fs.writeFile(filePath, content, 'utf8');
+    return { 
+      success: true, 
+      path: filePath, 
+      message: `Archivo '${path.basename(filePath)}' creado exitosamente` 
 ipcMain.handle('drive-download-file', async (event, file) => {
   try {
     const { dialog } = require('electron');
@@ -709,7 +724,6 @@ body {
 
     default:
       return `Archivo generado por J-Vairyx Personal Assistant
-==============================================
 
 Información del archivo:
 - Nombre: ${file.name}

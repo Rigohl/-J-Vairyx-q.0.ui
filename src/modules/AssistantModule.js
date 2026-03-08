@@ -434,6 +434,11 @@ const AssistantModule = () => {
           `Navegando a ${url}. ${result.message}` :
           `Error navegando: ${result.error}`;
       }
+      else if (originalMessage.toLowerCase().includes('investigar') || originalMessage.toLowerCase().includes('research')) {
+        const topic = extractTopic(originalMessage);
+        const result = await systemIntegrationService.researchTopic(topic, 'detailed');
+        response = `He iniciado una investigación completa sobre "${topic}". Realizando ${result.searches} búsquedas especializadas.`;
+      }
       
       // Enhanced profile and system information
       else if (originalMessage.toLowerCase().includes('mi perfil') || originalMessage.toLowerCase().includes('que sabes de mi')) {
@@ -442,6 +447,11 @@ const AssistantModule = () => {
       }
       else if (originalMessage.toLowerCase().includes('sistema') || originalMessage.toLowerCase().includes('info sistema')) {
         const sysInfo = await systemIntegrationService.getSystemInfo();
+        response = `Info del sistema: ${sysInfo.platform}, Memoria: ${sysInfo.memory}, CPU: ${sysInfo.cpu}. Conexiones activas: ${systemIntegrationService.appConnections.size}.`;
+      }
+      else {
+        // Use learning service for personalized response
+        response = learningService.getPersonalizedResponse(originalMessage);
         const improvementStatus = selfImprovementService.getImprovementStatus();
         response = `Sistema: ${sysInfo.platform}, Memoria: ${sysInfo.memory}, CPU: ${sysInfo.cpu}. Estado de salud: ${improvementStatus.overall_health}. Conexiones activas: ${systemIntegrationService.appConnections.size}.`;
       }
