@@ -1104,4 +1104,4 @@ class BusinessIntelligenceService {
 
 // Create and export singleton instance
 const businessIntelligenceService = new BusinessIntelligenceService();
-export default businessIntelligenceService;
+

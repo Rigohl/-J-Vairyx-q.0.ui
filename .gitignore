@@ -34,3 +34,5 @@ out/
 pids
 yarn-debug.log*
 yarn-error.log*
+src-tauri/target/
+src-tauri/target/
