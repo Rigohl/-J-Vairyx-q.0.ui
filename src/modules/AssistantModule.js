@@ -9,10 +9,7 @@ import deepResearchService from '../services/DeepResearchService';
 import selfImprovementService from '../services/SelfImprovementService';
 import jarvisPersonalityService from '../services/JarvisPersonalityService';
 import multiDomainExpertService from '../services/MultiDomainExpertService';
-import codeIntelligenceService from '../services/CodeIntelligenceService';
-import backendIntelligenceService from '../services/BackendIntelligenceService';
-import informationVerificationService from '../services/InformationVerificationService';
-import strategicReasoningService from '../services/StrategicReasoningService';
+
 import '../styles/holographic.css';
 
 const AssistantModule = () => {
@@ -21,8 +18,7 @@ const AssistantModule = () => {
       id: 1,
       type: 'assistant',
       content: jarvisPersonalityService.processResponse(
-        'Good day. I am J-Vairyx, your comprehensive AI assistant with enhanced capabilities. I now possess expertise across 15 specialized domains, advanced research capabilities including deep web analysis, document mastery for Excel, Word, and all office applications, rapid survey completion assistance, and continuous self-improvement protocols. How may I assist you today?',
-        { allowProactive: true }
+
       ),
       timestamp: new Date()
     }
@@ -275,6 +271,90 @@ const AssistantModule = () => {
         }
       }
       
+      // Backend and API Intelligence
+      else if (originalMessage.toLowerCase().includes('backend') || originalMessage.toLowerCase().includes('api') || 
+               originalMessage.toLowerCase().includes('servidor')) {
+        const backendExplanation = backendIntelligenceService.explainConcept(originalMessage);
+        response = `🔧 **Backend Intelligence Activated**\n\n${backendExplanation.explanation}\n\n💡 **¿Por qué esto importa?**\n${backendExplanation.why_care}\n\n🚀 **Próximos pasos:** ${backendExplanation.next_steps?.slice(0, 2).join(', ') || 'Explora más conceptos backend'}`;
+      }
+      
+      // Database operations and intelligent storage
+      else if (originalMessage.toLowerCase().includes('crear base de datos')) {
+        const dbName = extractDatabaseName(originalMessage) || 'user_database';
+        const result = databaseService.createDatabase(dbName, { 
+          description: `Database created by user request: ${originalMessage}`,
+          autoIndex: true
+        });
+        response = result.success ? 
+          `🗄️ Base de datos "${dbName}" creada exitosamente con capacidades inteligentes de búsqueda e indexación automática. Puedo almacenar y buscar información instantáneamente. ${result.message}` :
+          `❌ Error creando base de datos: ${result.error}`;
+      }
+      else if (originalMessage.toLowerCase().includes('buscar en base') || originalMessage.toLowerCase().includes('buscar dato')) {
+        const query = extractSearchQuery(originalMessage);
+        const searchResult = databaseService.search(query, { fuzzy: true, maxResults: 10 });
+        response = searchResult.totalFound > 0 ?
+          `🔍 Encontré ${searchResult.totalFound} resultados para "${query}" en ${searchResult.searchedDatabases.length} bases de datos (búsqueda completada en ${searchResult.queryTime}ms). Los resultados más relevantes están relacionados con ${searchResult.results.slice(0, 3).map(r => r.database).join(', ')}.` :
+          `🔍 No encontré resultados para "${query}" en las bases de datos. ¿Quieres que cree una nueva base de datos o busque en internet?`;
+      }
+      else if (originalMessage.toLowerCase().includes('estadística') && originalMessage.toLowerCase().includes('base')) {
+        const stats = databaseService.getDatabaseStatistics();
+        const recommendations = databaseService.getPersonalizedRecommendations();
+        response = `📊 Estado de bases de datos: ${stats.totalDatabases} bases activas, ${stats.totalRecords} registros totales, ${stats.totalQueries} consultas realizadas. Tiempo promedio de consulta: ${stats.averageQueryTime.toFixed(2)}ms. ${recommendations.length > 0 ? `Tengo ${recommendations.length} recomendaciones basadas en tus datos.` : ''}`;
+      }
+      
+      // Document analysis capabilities
+      else if (originalMessage.toLowerCase().includes('analizar documento')) {
+        const fileName = extractFileName(originalMessage) || 'document.pdf';
+        const analysisResult = await documentAnalysisService.analyzeDocument(fileName, null, { comprehensive: true });
+        response = analysisResult.success ?
+          `📄 Análisis completado de "${fileName}": ${analysisResult.insights.readabilityScore.toFixed(1)}% de legibilidad, ${analysisResult.insights.keyTopics.slice(0, 3).join(', ')} como temas clave. ${analysisResult.insights.actionableInsights.slice(0, 2).join('. ')}` :
+          `❌ Error analizando documento: ${analysisResult.error}`;
+      }
+      else if (originalMessage.toLowerCase().includes('estadística') && originalMessage.toLowerCase().includes('documento')) {
+        const stats = documentAnalysisService.getAnalysisStatistics();
+        response = `📊 He analizado ${stats.metrics.totalAnalyzed} documentos (legibilidad promedio: ${stats.metrics.averageReadability.toFixed(1)}%, tiempo promedio: ${stats.metrics.averageAnalysisTime.toFixed(0)}ms). Categorías: ${stats.categories.length} identificadas. Recomendaciones de mejora disponibles.`;
+      }
+      
+      // Business Intelligence
+      else if (originalMessage.toLowerCase().includes('empresa') || originalMessage.toLowerCase().includes('negocio') || 
+               originalMessage.toLowerCase().includes('mercado') || originalMessage.toLowerCase().includes('estrategia') ||
+               originalMessage.toLowerCase().includes('competencia')) {
+        const businessExplanation = businessIntelligenceService.explainConcept(originalMessage);
+        response = `💼 **Business Intelligence Activated**\n\n${businessExplanation.title}\n\n${businessExplanation.fundamental_definition || businessExplanation.explanation}\n\n🎯 **Aplicación Estratégica:**\n${businessExplanation.strategic_thinking || businessExplanation.business_impact?.slice(0, 2).join('\n') || 'Pensamiento empresarial avanzado'}`;
+      }
+      
+      // Information Verification and Critical Thinking
+      else if (originalMessage.toLowerCase().includes('información') || originalMessage.toLowerCase().includes('fuente') || 
+               originalMessage.toLowerCase().includes('verdad') || originalMessage.toLowerCase().includes('falso') ||
+               originalMessage.toLowerCase().includes('verificar') || originalMessage.toLowerCase().includes('confiable')) {
+        const verificationGuidance = informationVerificationService.explainInformationLiteracy();
+        response = `🔍 **Information Intelligence Activated**\n\n${verificationGuidance.fundamental_principle}\n\n**Jerarquía de Fuentes:**\n🥇 ${verificationGuidance.information_hierarchy.tier_1_gold.sources} (${verificationGuidance.information_hierarchy.tier_1_gold.reliability})\n🥈 ${verificationGuidance.information_hierarchy.tier_2_silver.sources} (${verificationGuidance.information_hierarchy.tier_2_silver.reliability})\n\n🛡️ **Banderas rojas:** ${verificationGuidance.red_flags_critical.slice(0, 3).join(', ')}`;
+      }
+      
+      // Strategic Reasoning and Thinking
+      else if (originalMessage.toLowerCase().includes('estrategia') || originalMessage.toLowerCase().includes('análisis') || 
+               originalMessage.toLowerCase().includes('decisión') || originalMessage.toLowerCase().includes('planificar') ||
+               originalMessage.toLowerCase().includes('resolver problema') || originalMessage.toLowerCase().includes('pensamiento')) {
+        const strategicGuidance = strategicReasoningService.explainStrategicThinking();
+        response = `🎯 **Strategic Intelligence Activated**\n\n${strategicGuidance.essence}\n\n**Principios Clave:**\n🎲 ${strategicGuidance.core_principles.choose_your_battles.concept}\n⚡ ${strategicGuidance.core_principles.leverage_thinking.concept}\n🔄 ${strategicGuidance.core_principles.systems_perspective.concept}\n\n🧠 **Preguntas Estratégicas:** ${strategicGuidance.strategic_questions.positioning.slice(0, 2).join(', ')}`;
+      }
+      
+      // Code and Programming Intelligence
+      else if (originalMessage.toLowerCase().includes('código') || originalMessage.toLowerCase().includes('programar') || 
+               originalMessage.toLowerCase().includes('algoritmo') || originalMessage.toLowerCase().includes('software') ||
+               originalMessage.toLowerCase().includes('desarrollo') || originalMessage.toLowerCase().includes('programming')) {
+        const codeExplanation = codeIntelligenceService.explainConcept(originalMessage);
+        response = `💻 **Code Intelligence Activated**\n\n${codeExplanation.title}\n\n${codeExplanation.fundamental_reality || codeExplanation.explanation}\n\n**¿Por qué esto te da superpoderes?**\n${codeExplanation.strategic_value || codeExplanation.why_code_matters?.strategic_thinking?.slice(0, 3).join('\n') || 'Pensamiento lógico y automatización'}`;
+      }
+      
+      // Autonomous Learning and Tool Discovery
+      else if (originalMessage.toLowerCase().includes('aprender') || originalMessage.toLowerCase().includes('herramienta') || 
+               originalMessage.toLowerCase().includes('autonomo') || originalMessage.toLowerCase().includes('independiente') ||
+               originalMessage.toLowerCase().includes('mejorar') || originalMessage.toLowerCase().includes('descubrir')) {
+        const learningGuidance = strategicReasoningService.explainAutonomousLearning();
+        response = `🧠 **Autonomous Learning Intelligence Activated**\n\n${learningGuidance.autonomous_definition}\n\n**Ciclo de Aprendizaje Autónomo:**\n📊 ${learningGuidance.autonomous_cycle.assess.action}\n🔍 ${learningGuidance.autonomous_cycle.explore.action}\n🧪 ${learningGuidance.autonomous_cycle.experiment.action}\n🔗 ${learningGuidance.autonomous_cycle.integrate.action}\n\n${learningGuidance.strategic_advantage}`;
+      }
+      
       // Self-improvement insights
       else if (originalMessage.toLowerCase().includes('mejora') || originalMessage.toLowerCase().includes('actualiza') || originalMessage.toLowerCase().includes('optimize')) {
         const improvementSuggestion = selfImprovementService.generateProactiveImprovement();
@@ -410,6 +490,12 @@ const AssistantModule = () => {
   };
 
   const extractSearchQuery = (message) => {
+    // Check if it's a database search or web search
+    if (message.toLowerCase().includes('buscar en base') || message.toLowerCase().includes('buscar dato')) {
+      const match = message.match(/buscar\s+(?:en\s+base\s+)?["']?(.+?)["']?\s*(?:en|$)/i);
+      return match ? match[1].trim() : message.replace(/buscar\s+(?:en\s+base\s+)?/i, '').trim();
+    }
+    // Web search
     const match = message.match(/buscar (?:en internet |web )?["`']?([^"`']+)["`']?/i);
     return match ? match[1] : 'información general';
   };
@@ -444,6 +530,11 @@ const AssistantModule = () => {
       }
     }
     return 'general';
+  };
+
+  const extractDatabaseName = (message) => {
+    const match = message.match(/(?:base de datos|database)\s+["']?(\w+)["']?/i);
+    return match ? match[1] : null;
   };
 
   const determineUserActivity = (message) => {

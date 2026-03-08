@@ -10,7 +10,7 @@
     "build": "tauri build",
     "electron": "electron .",
     "electron-pack": "electron-builder build",
-    "dist": "npm run build && npm run electron-pack"
+
   },
   "keywords": [
     "personal-assistant",

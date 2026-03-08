@@ -1334,9 +1334,7 @@ class CodeIntelligenceService {
       score -= 0.1;
     }
 
-    return {
-      score: Math.max(0, Math.min(1, score)),
-      issues: issues.length > 0 ? issues : ['Buena legibilidad general']
+
     };
   }
 
@@ -1359,7 +1357,6 @@ class CodeIntelligenceService {
           if (code[endIndex] === '}') braceCount--;
           endIndex++;
         }
-
         const functionLines = code.substring(startIndex, endIndex).split('\n').length;
         if (functionLines > 50) {
           issues.push(`Función/método muy largo (${functionLines} líneas)`);
