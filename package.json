@@ -9,7 +9,7 @@
     "react-start": "webpack serve --mode development",
     "build": "tauri build",
     "electron": "electron .",
-    "electron-pack": "electron-builder build",
+    "electron-pack": "electron-builder build"
 
   },
   "keywords": [
