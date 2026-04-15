@@ -48,10 +48,9 @@ function createWindow() {
 
   // Handle window closed - hide to tray instead of quit in background mode
   mainWindow.on('close', (event) => {
-      event.preventDefault();
-      mainWindow.hide();
-      showTrayNotification('J-Vairyx sigue ejecutándose en segundo plano');
-    }
+    event.preventDefault();
+    mainWindow.hide();
+    showTrayNotification('J-Vairyx sigue ejecutándose en segundo plano');
   });
 
   mainWindow.on('closed', () => {
@@ -234,33 +233,27 @@ function showTrayNotification(message) {
 
 // Background intelligence services
 function initializeBackgroundServices() {
-  if (isDev) {
-    console.log('🚀 Inicializando servicios de inteligencia en segundo plano...');
-  }
-  
   // Start autonomous learning and improvement cycles
   setInterval(() => {
     // Simulate autonomous learning processes
-    if (isDev) {
-      console.log('🧠 Proceso de aprendizaje autónomo ejecutándose...');
-    }
   }, 300000); // Every 5 minutes
   
   // Start intelligent monitoring
   setInterval(() => {
     // Simulate system monitoring and optimization
-    if (isDev) {
-      console.log('⚡ Monitoreo inteligente del sistema...');
-    }
   }, 600000); // Every 10 minutes
   
   // Start proactive assistance checks
   setInterval(() => {
     // Check for proactive assistance opportunities
-    console.log('💡 Buscando oportunidades de asistencia proactiva...');
+    if (isDev) {
+      console.log('💡 Buscando oportunidades de asistencia proactiva...');
+    }
   }, 900000); // Every 15 minutes
   
-  console.log('✅ Servicios de inteligencia iniciados correctamente');
+  if (isDev) {
+    console.log('✅ Servicios de inteligencia iniciados correctamente');
+  }
 }
 
 // Security: Prevent new window creation
@@ -408,21 +401,6 @@ ipcMain.handle('drive-upload-file', async (event, filePath) => {
   return appData.files;
 });
 
-ipcMain.handle('drive-download-file', (event, fileId) => {
-  // In a real implementation, this would handle actual file downloads
-  const file = appData.files.find(f => f.id === fileId);
-  return file ? `Descargando: ${file.name}` : 'Archivo no encontrado';
-});
-
-// Enhanced file system IPC handlers
-ipcMain.handle('create-file', async (event, filePath, content = '', options = {}) => {
-  try {
-    const fs = require('fs').promises;
-    await fs.writeFile(filePath, content, 'utf8');
-    return { 
-      success: true, 
-      path: filePath, 
-      message: `Archivo '${path.basename(filePath)}' creado exitosamente` 
 ipcMain.handle('drive-download-file', async (event, file) => {
   try {
     const { dialog } = require('electron');
@@ -513,11 +491,6 @@ ipcMain.handle('execute-file', async (event, file) => {
     };
   }
 });
-
-// Helper function to generate file content
-function generateFileContent(file) {
-  const extension = require('path').extname(file.name).toLowerCase();
-  const baseName = require('path').basename(file.name, extension);
 
 // Helper to sanitize filenames for content injection
 function sanitizeForContent(str) {
