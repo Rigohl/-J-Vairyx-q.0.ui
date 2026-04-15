@@ -6,8 +6,42 @@ const isDev = process.env.NODE_ENV === 'development';
 
 // Keep a global reference of the window object
 let mainWindow;
+let settingsWindow;
 let tray = null;
 let isBackgroundMode = process.argv.includes('--hidden');
+
+function createSettingsWindow() {
+  if (settingsWindow) {
+    settingsWindow.focus();
+    return;
+  }
+
+  settingsWindow = new BrowserWindow({
+    width: 600,
+    height: 700,
+    title: 'Configuraciones de J-Vairyx',
+    icon: path.join(__dirname, 'assets/icon.png'),
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      enableRemoteModule: false,
+      preload: path.join(__dirname, 'preload.js')
+    }
+  });
+
+  const startUrl = isDev
+    ? 'http://localhost:3000?view=settings'
+    : `file://${path.join(__dirname, '../build/index.html')}?view=settings`;
+
+  settingsWindow.loadURL(startUrl);
+
+  settingsWindow.on('closed', () => {
+    settingsWindow = null;
+  });
+
+  // Remove menu from settings window
+  settingsWindow.setMenu(null);
+}
 
 function createWindow() {
   // Create the browser window
@@ -48,10 +82,9 @@ function createWindow() {
 
   // Handle window closed - hide to tray instead of quit in background mode
   mainWindow.on('close', (event) => {
-      event.preventDefault();
-      mainWindow.hide();
-      showTrayNotification('J-Vairyx sigue ejecutándose en segundo plano');
-    }
+    event.preventDefault();
+    mainWindow.hide();
+    showTrayNotification('J-Vairyx sigue ejecutándose en segundo plano');
   });
 
   mainWindow.on('closed', () => {
@@ -86,7 +119,7 @@ function createWindow() {
           label: 'Configuraciones',
           accelerator: 'CmdOrCtrl+,',
           click: () => {
-            // TODO: Open settings window
+            createSettingsWindow();
           }
         },
         { type: 'separator' },
@@ -276,6 +309,16 @@ ipcMain.handle('app-version', () => {
   return app.getVersion();
 });
 
+ipcMain.handle('get-settings', () => {
+  return appData.settings;
+});
+
+ipcMain.handle('save-settings', (event, newSettings) => {
+  appData.settings = { ...appData.settings, ...newSettings };
+  saveData(appData);
+  return { success: true };
+});
+
 ipcMain.handle('show-message-box', async (event, options) => {
   const { dialog } = require('electron');
   const result = await dialog.showMessageBox(mainWindow, options);
@@ -408,21 +451,7 @@ ipcMain.handle('drive-upload-file', async (event, filePath) => {
   return appData.files;
 });
 
-ipcMain.handle('drive-download-file', (event, fileId) => {
-  // In a real implementation, this would handle actual file downloads
-  const file = appData.files.find(f => f.id === fileId);
-  return file ? `Descargando: ${file.name}` : 'Archivo no encontrado';
-});
 
-// Enhanced file system IPC handlers
-ipcMain.handle('create-file', async (event, filePath, content = '', options = {}) => {
-  try {
-    const fs = require('fs').promises;
-    await fs.writeFile(filePath, content, 'utf8');
-    return { 
-      success: true, 
-      path: filePath, 
-      message: `Archivo '${path.basename(filePath)}' creado exitosamente` 
 ipcMain.handle('drive-download-file', async (event, file) => {
   try {
     const { dialog } = require('electron');
@@ -513,11 +542,6 @@ ipcMain.handle('execute-file', async (event, file) => {
     };
   }
 });
-
-// Helper function to generate file content
-function generateFileContent(file) {
-  const extension = require('path').extname(file.name).toLowerCase();
-  const baseName = require('path').basename(file.name, extension);
 
 // Helper to sanitize filenames for content injection
 function sanitizeForContent(str) {
