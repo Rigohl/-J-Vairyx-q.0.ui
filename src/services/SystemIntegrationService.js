@@ -37,8 +37,6 @@ class SystemIntegrationService {
     setInterval(() => {
       this.analyzeWebTrends();
     }, 900000); // Every 15 minutes
-
-    console.log('🌐 Automatic internet navigation system initialized');
   }
 
   // Enhanced web search with automatic follow-up
@@ -87,8 +85,6 @@ class SystemIntegrationService {
         });
       }, (index + 1) * 15000);
     });
-
-    console.log(`🔍 Scheduled ${relatedQueries.length} follow-up searches for: ${originalQuery}`);
   }
 
   // Generate related search queries
@@ -143,8 +139,6 @@ class SystemIntegrationService {
         timestamp: new Date()
       });
 
-      console.log(`🤖 Automatic search completed: ${query}`);
-      
       return {
         success: true,
         query: query,
@@ -298,8 +292,6 @@ class SystemIntegrationService {
       // Delay between explorations
       await this.delay(10000); // 10 seconds
     }
-
-    console.log(`🌐 Completed intelligent web exploration of ${explorationTargets.length} targets`);
   }
 
   // Identify targets for web exploration
@@ -355,8 +347,6 @@ class SystemIntegrationService {
   // Explore a specific web target
   async exploreWebTarget(target) {
     try {
-      console.log(`🎯 Exploring: ${target.query}`);
-      
       const explorationResult = await this.performAutomaticSearch(target.query, {
         explorationType: target.type,
         priority: target.priority,
@@ -457,8 +447,6 @@ class SystemIntegrationService {
   // Process individual navigation item
   async processNavigationItem(item) {
     try {
-      console.log(`📋 Processing navigation item: ${item.query}`);
-      
       const result = await this.performDetailedNavigation(item);
       
       // Store results
@@ -537,7 +525,6 @@ class SystemIntegrationService {
       userInterests: this.mapUserInterests()
     };
 
-    console.log('📊 Web trends analysis completed:', trends);
     return trends;
   }
 
