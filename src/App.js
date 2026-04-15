@@ -2,12 +2,30 @@ import React, { useState } from 'react';
 import AssistantModule from './modules/AssistantModule';
 import OrganizerModule from './modules/OrganizerModule';
 import DriveModule from './modules/DriveModule';
+import SettingsModule from './modules/SettingsModule';
 import FloatingWindow from './components/FloatingWindow';
 import './styles/global.css';
 
 const App = () => {
   const [activeModule, setActiveModule] = useState('assistant');
   const [version] = useState('0.1.0');
+
+  // Determine if we should show settings based on URL parameters
+  const queryParams = new URLSearchParams(window.location.search);
+  const isSettingsView = queryParams.get('view') === 'settings';
+
+  if (isSettingsView) {
+    return (
+      <div className="app-container settings-view">
+        <div className="background-decor">
+          <div className="blob"></div>
+        </div>
+        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto', width: '100%' }}>
+          <SettingsModule />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">

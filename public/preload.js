@@ -52,5 +52,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     getInfo: () => ipcRenderer.invoke('system-get-info'),
     getUsage: () => ipcRenderer.invoke('system-get-usage'),
     executeCommand: (command) => ipcRenderer.invoke('system-execute-command', command)
-  }
+  },
+
+  // Settings
+  getSettings: () => ipcRenderer.invoke('get-settings'),
+  saveSettings: (settings) => ipcRenderer.invoke('save-settings', settings)
 });
