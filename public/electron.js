@@ -93,7 +93,9 @@ function createWindow() {
 
   // Handle external links
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url);
+    if (isValidExternalUrl(url)) {
+      shell.openExternal(url);
+    }
     return { action: 'deny' };
   });
 
@@ -300,7 +302,9 @@ function initializeBackgroundServices() {
 app.on('web-contents-created', (event, contents) => {
   contents.on('new-window', (event, url) => {
     event.preventDefault();
-    shell.openExternal(url);
+    if (isValidExternalUrl(url)) {
+      shell.openExternal(url);
+    }
   });
 });
 
@@ -358,6 +362,19 @@ const validatePath = (userInputPath) => {
   }
 
   return resolvedPath;
+};
+
+/**
+ * Validates external URLs before opening them.
+ * Only allows http: and https: protocols to prevent RCE and other attacks.
+ */
+const isValidExternalUrl = (url) => {
+  try {
+    const parsedUrl = new URL(url);
+    return ['http:', 'https:'].includes(parsedUrl.protocol);
+  } catch (error) {
+    return false;
+  }
 };
 
 const loadData = () => {
@@ -837,6 +854,9 @@ ipcMain.handle('get-system-info', async () => {
 
 ipcMain.handle('open-url', async (event, url) => {
   try {
+    if (!isValidExternalUrl(url)) {
+      throw new Error('Invalid URL protocol');
+    }
     await shell.openExternal(url);
     return { success: true, url };
   } catch (error) {
@@ -946,6 +966,9 @@ ipcMain.handle('system-get-usage', async () => {
 // Handle external links
 ipcMain.handle('open-external', async (event, url) => {
   try {
+    if (!isValidExternalUrl(url)) {
+      throw new Error('Invalid URL protocol');
+    }
     await shell.openExternal(url);
     return { success: true };
   } catch (error) {
