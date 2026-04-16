@@ -169,7 +169,7 @@ src/services/
 
 ### Privacy Protection
 - Current state: user interaction and learning data are stored locally by the host system
-- Current state: no custom encryption layer or explicit consent/transmission controls are implemented in this enhancement
+- Current state: explicit consent controls are implemented in this enhancement. No custom encryption layer yet.
 - Planned (TODO): add encryption for stored and transmitted assistant data
 - Completed: implemented explicit consent management and GDPR-aligned data handling flows
 
