@@ -457,12 +457,12 @@ const AssistantModule = () => {
       }
       
       // JARVIS personality easter egg (secret)
-      else if (originalMessage.toLowerCase().includes('jarvis') || originalMessage.toLowerCase().includes('iron man')) {
+      if (originalMessage.toLowerCase().includes('jarvis') || originalMessage.toLowerCase().includes('iron man')) {
         const jarvisResponse = jarvisPersonalityService.handleJarvisReference(originalMessage);
         response = jarvisResponse || learningService.getPersonalizedResponse(originalMessage);
       }
       
-      else if (!response) {
+      if (!response) {
         // Intelligence Domain Processing
         switch (domain) {
           case 'coding':

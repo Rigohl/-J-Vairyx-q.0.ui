@@ -1,3 +1,4 @@
+import consentManagementService from './ConsentManagementService';
 import { invoke } from "@tauri-apps/api/tauri";
 
 // Named constants for better code health
@@ -15,6 +16,10 @@ class LearningService {
 
   // Track user interaction by sending data to Rust backend
   async logInteraction(type, data) {
+    if (!consentManagementService.hasConsent('learning')) {
+      console.warn('Blocked learning tracking due to missing GDPR consent');
+      return;
+    }
     try {
       await invoke("log_interaction", {
         interaction_type: type,

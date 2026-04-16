@@ -4,6 +4,7 @@ import OrganizerModule from './modules/OrganizerModule';
 import DriveModule from './modules/DriveModule';
 import SettingsModule from './modules/SettingsModule';
 import FloatingWindow from './components/FloatingWindow';
+import ConsentBanner from './components/ConsentBanner';
 import './styles/global.css';
 
 const App = () => {
@@ -17,6 +18,7 @@ const App = () => {
   if (isSettingsView) {
     return (
       <div className="app-container settings-view">
+        <ConsentBanner />
         <div className="background-decor">
           <div className="blob"></div>
         </div>
@@ -29,6 +31,7 @@ const App = () => {
 
   return (
     <div className="app-container">
+      <ConsentBanner />
       {/* El fondo puede tener la visualización de red neuronal si se desea,
           pero la prioridad es la Chat App Flotante */}
       <div className="background-decor">

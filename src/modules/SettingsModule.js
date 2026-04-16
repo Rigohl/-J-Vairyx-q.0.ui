@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ConsentManager from '../components/ConsentManager';
 
 const SettingsModule = () => {
   const [settings, setSettings] = useState({
@@ -157,6 +158,7 @@ const SettingsModule = () => {
           Guardar Cambios
         </button>
       </div>
+      <ConsentManager />
     </div>
   );
 };

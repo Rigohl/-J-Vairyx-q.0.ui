@@ -1,3 +1,4 @@
+import consentManagementService from './ConsentManagementService';
 // Database Service - Intelligent data storage, retrieval, and knowledge management
 class DatabaseService {
   constructor() {
@@ -51,6 +52,24 @@ class DatabaseService {
   }
 
   // Save databases to localStorage
+  // GDPR Support: Clear all user data
+  clearAllDatabases() {
+    this.databases.clear();
+    this.knowledgeBase = {
+      researched_topics: new Map(),
+      learned_patterns: new Map(),
+      user_preferences: new Map(),
+      improvement_suggestions: new Map(),
+      document_analysis: new Map(),
+      user_patterns: new Map()
+    };
+    this.searchIndex.clear();
+    localStorage.removeItem('jvairyx-databases');
+    this.createDefaultDatabases();
+    console.log('✅ All databases cleared (GDPR Right to Erasure)');
+    return true;
+  }
+
   saveDatabases() {
     try {
       const dataToSave = {
@@ -137,6 +156,16 @@ class DatabaseService {
   // Insert data into a database
   insert(databaseName, key, data, metadata = {}) {
     const startTime = Date.now();
+
+    // GDPR Consent checks before storing learning data
+    if ((databaseName === 'learned_patterns' || databaseName === 'user_patterns' || databaseName === 'user_preferences') && !consentManagementService.hasConsent('learning')) {
+      console.warn('Blocked insert to ' + databaseName + ' due to missing GDPR consent');
+      return { success: false, error: 'Missing GDPR consent for learning' };
+    }
+    if (databaseName === 'assistant_history' && !consentManagementService.hasConsent('assistant_history')) {
+       console.warn('Blocked insert to assistant_history due to missing GDPR consent');
+       return { success: false, error: 'Missing GDPR consent for history' };
+    }
     
     if (!this.databases.has(databaseName)) {
       this.createDatabase(databaseName);

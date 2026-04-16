@@ -1076,7 +1076,6 @@ class BusinessIntelligenceService {
       learning_questions: this.generateLearningQuestions(topic)
     };
   }
-
   generateStrategicInsight(topic) {
     return `Análisis estratégico de ${topic} considerando tendencias actuales, 
     fuerzas competitivas, y oportunidades de creación de valor único.`;
@@ -1105,3 +1104,4 @@ class BusinessIntelligenceService {
 // Create and export singleton instance
 const businessIntelligenceService = new BusinessIntelligenceService();
 
+export default businessIntelligenceService;

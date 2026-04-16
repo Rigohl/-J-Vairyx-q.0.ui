@@ -37,6 +37,7 @@ class SelfImprovementService {
       adaptationRate: 0.7,
       contextAwareness: 0.9,
       userUnderstanding: 0.8
+    };
 
     this.startSelfAssessment();
     this.initializeImprovementFile();

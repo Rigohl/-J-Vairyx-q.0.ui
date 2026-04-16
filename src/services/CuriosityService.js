@@ -173,10 +173,6 @@ class CuriosityService {
         this.generateProactiveSuggestion();
       }
     }, 120000); // Every 2 minutes for more responsiveness
-      this.evaluateResearchOpportunities();
-      this.suggestKnowledgeExpansion();
-      this.analyzeCurrentContext();
-    }, 120000); // Every 2 minutes
 
     // Start autonomous research sessions
     setInterval(() => {
