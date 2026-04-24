@@ -45,7 +45,6 @@ class DatabaseService {
         }
       }
     } catch (error) {
-      console.log('Initializing new database system');
       this.createDefaultDatabases();
     }
   }
@@ -128,7 +127,6 @@ class DatabaseService {
     this.databases.set(name, database);
     this.knowledgeBase[name] = database.data;
     
-    console.log(`✅ Database '${name}' created successfully`);
     this.saveDatabases();
     
     return database;
@@ -392,8 +390,6 @@ class DatabaseService {
         this.updateSearchIndex(dbName, key, record.searchableText);
       });
     });
-    
-    console.log('🔍 Search index rebuilt for optimized queries');
   }
 
   // Enforce maximum size limits on databases
