@@ -39,6 +39,11 @@ class SystemIntegrationService {
     }, 900000); // Every 15 minutes
   }
 
+  // Generate a unique key for the knowledge base
+  _generateKnowledgeKey(prefix) {
+    return `${prefix}_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+  }
+
   // Enhanced web search with automatic follow-up
   async searchWeb(query, options = {}) {
     try {
@@ -132,7 +137,8 @@ class SystemIntegrationService {
       this.automaticSearches.push(searchData);
       
       // Add to knowledge base
-      this.webKnowledgeBase.set(`search_${Date.now()}`, {
+      const searchKey = this._generateKnowledgeKey('search');
+      this.webKnowledgeBase.set(searchKey, {
         type: 'automatic_search',
         query: query,
         analysis: analysisResults,
@@ -286,12 +292,8 @@ class SystemIntegrationService {
 
     const explorationTargets = this.identifyExplorationTargets();
     
-    for (const target of explorationTargets) {
-      await this.exploreWebTarget(target);
-      
-      // Delay between explorations
-      await this.delay(10000); // 10 seconds
-    }
+    // Process targets concurrently
+    await Promise.all(explorationTargets.map(target => this.exploreWebTarget(target)));
   }
 
   // Identify targets for web exploration
@@ -376,7 +378,8 @@ class SystemIntegrationService {
       actionable: this.isActionableInformation(result)
     };
 
-    this.webKnowledgeBase.set(`exploration_${Date.now()}`, finding);
+    const explorationKey = this._generateKnowledgeKey('exploration');
+    this.webKnowledgeBase.set(explorationKey, finding);
 
     // If highly relevant, add to navigation queue for detailed exploration
     if (finding.relevanceScore > 0.8) {
@@ -450,7 +453,8 @@ class SystemIntegrationService {
       const result = await this.performDetailedNavigation(item);
       
       // Store results
-      this.webKnowledgeBase.set(`navigation_${Date.now()}`, {
+      const navigationKey = this._generateKnowledgeKey('navigation');
+      this.webKnowledgeBase.set(navigationKey, {
         item: item,
         result: result,
         processedAt: new Date()
@@ -661,7 +665,8 @@ class SystemIntegrationService {
     }
 
     // Store research session
-    this.webKnowledgeBase.set(`research_${Date.now()}`, {
+    const researchKey = this._generateKnowledgeKey('research');
+    this.webKnowledgeBase.set(researchKey, {
       type: 'topic_research',
       topic: topic,
       depth: depth,
