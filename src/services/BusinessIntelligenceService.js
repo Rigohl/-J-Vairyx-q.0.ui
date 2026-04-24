@@ -1060,6 +1060,76 @@ class BusinessIntelligenceService {
     };
   }
 
+  analyzeCompetition(description, context) {
+    return {
+      direct_competitors: 'Competitors offering similar solutions',
+      indirect_competitors: 'Alternatives satisfying the same underlying need',
+      competitive_advantage: 'Factors that differentiate the value proposition'
+    };
+  }
+
+  suggestBusinessModels(description, context) {
+    return [
+      'SaaS (Software as a Service)',
+      'Marketplace',
+      'Freemium',
+      'Subscription',
+      'Platform'
+    ];
+  }
+
+  identifySuccessFactors(description, context) {
+    return [
+      'Product-market fit',
+      'Technical scalability',
+      'Customer acquisition efficiency',
+      'Operational excellence',
+      'Strategic partnerships'
+    ];
+  }
+
+  identifyRisks(description, context) {
+    return [
+      'Market risk and adoption',
+      'Execution and technical debt',
+      'Financial sustainability',
+      'Regulatory compliance',
+      'Competitive pressure'
+    ];
+  }
+
+  generateRecommendations(description, context) {
+    return [
+      'Validate core assumptions with target customers',
+      'Define MVP with essential features',
+      'Establish key performance indicators (KPIs)',
+      'Analyze unit economics and scalability',
+      'Build a sustainable competitive moat'
+    ];
+  }
+
+  identifyMarketOpportunity(topic) {
+    return `Analysis of market opportunity for ${topic} considering current trends and customer needs.`;
+  }
+
+  analyzeCompetitiveSpace(topic) {
+    return `Analysis of the competitive landscape for ${topic} including direct and indirect players.`;
+  }
+
+  suggestBusinessModel(topic) {
+    return `Recommended business model strategy for ${topic} based on market dynamics.`;
+  }
+
+  defineSuccessMetrics(topic) {
+    return [
+      'User growth and adoption rate',
+      'Customer retention and churn',
+      'Revenue and lifetime value (LTV)',
+      'Net Promoter Score (NPS)',
+      'Market share expansion'
+    ];
+  }
+
   generateBusinessInsight(topic, userContext = {}) {
     const insights = {
       strategic_thinking: this.generateStrategicInsight(topic),
