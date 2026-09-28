@@ -8,6 +8,7 @@
     "start": "tauri dev",
     "react-start": "webpack serve --mode development",
     "build": "tauri build",
+    "vercel-build": "webpack --mode production",
     "electron": "electron .",
     "electron-pack": "electron-builder build"
   },
