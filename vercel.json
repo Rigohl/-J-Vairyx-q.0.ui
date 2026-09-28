@@ -1,0 +1,6 @@
+{
+  "buildCommand": "npm run react-start",
+  "outputDirectory": "dist",
+  "framework": null,
+  "installCommand": "npm install"
+}
